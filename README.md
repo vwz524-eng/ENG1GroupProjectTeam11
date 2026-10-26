@@ -11,11 +11,9 @@ The engineering project for year 2 semester 1, as a part of the assessed ENG1 gr
 ## Details, Setup and Compilation
 
 Base install is libGDX with extentions:
-{
 - Ashley
 - AI
 - Box2D
-}
 
 # Setup
 
