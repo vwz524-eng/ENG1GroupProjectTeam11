@@ -17,7 +17,7 @@ Base install is libGDX with extentions:
 
 # Setup
 
-- Use the command: git clone https://github.com/vwz524-eng/ENG1GroupProjectTeam11.git [your://directory] or use git GUI
+- Use the command: git clone https://github.com/vwz524-eng/ENG1GroupProjectTeam11.git your://directory or use git GUI
 - Open gradle project (build.gradle), (Open as project), or (File -> Open Project) or (File -> Import... -> Gradle -> Existing Gradle Project) depending on the IDE
 - To run/test: File -> Import... -> Gradle -> Existing Gradle Project 
 - To compile, the command ./gradlew lwjgl3:dist will output a runnable  .jar file
