@@ -15,7 +15,7 @@ Base install is libGDX with extentions:
 - AI
 - Box2D
 
-## Setup
+### Setup
 
 - Use the command: git clone https://github.com/vwz524-eng/ENG1GroupProjectTeam11.git your://directory or use git GUI
 - Open gradle project (build.gradle), (Open as project), or (File -> Open Project) or (File -> Import... -> Gradle -> Existing Gradle Project) depending on the IDE
