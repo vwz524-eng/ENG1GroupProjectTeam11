@@ -38,7 +38,11 @@ Week 2 - Initial Planning
 
 Week 3 - Risk Management and Initial Architecture 
 
+![Week 3 Gantt Chart](week-3-snapshot.png)
+
 Week 5 - Revised Architecture and Design 
+
+![Week 5 Gantt Chart](week-5-snapshot.png)
 
 ### Evolution of the Project Plan
 
