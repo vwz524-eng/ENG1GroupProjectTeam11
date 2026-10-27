@@ -34,6 +34,8 @@ The following snapshots show how our project plan evolved over time. Each snapsh
 
 Week 2 - Initial Planning
 
+![Week 2 Gantt Chart](week-2-snapshot.png)
+
 Week 3 - Risk Management and Initial Architecture 
 
 Week 5 - Revised Architecture and Design 
