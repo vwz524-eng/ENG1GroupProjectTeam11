@@ -46,4 +46,5 @@ Week 5 - Revised Architecture and Design
 
 ### Evolution of the Project Plan
 
+Our project plan has evolved throughout the project as we have made progress and identified tasks that needed more time than expected. Initially, we focused on gathering the requirements and beginning the architecture work. However, on 20 October, we prioritised the risk assessment and risk management process while waiting for the architecture lecture, allowing us to continue making progress on other parts of the assessment. On 26 October, we also planned the main game features and mechanics to help inform our UML diagrams and overall design. As the architecture work progressed, we realised that some diagrams needed revising and additional event and design-pattern diagrams were required, alongside justifications and references. This meant the architecture work took longer than originally planned, so we updated our schedule to reflect the remaining tasks and the time available before the deadline. We will continue reviewing the plan as implementation and testing progress.
 
