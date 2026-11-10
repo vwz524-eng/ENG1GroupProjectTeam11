@@ -1,118 +1,74 @@
 package io.github.gegame;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+
+public class Goose extends Sprite {
+    private int health = 30;
+    private final double speed = 90;
  
-import java.util.ArrayList;
-import java.util.List;
-
-public class Goose extends Entity {
-
-    public static final String ASSET = "goose.png";
-    private enum State { CHASING, DISTRACTED, LEAVING };
-
-
-    
-    public static final int HUNGER_TO_FILL = 3; // pieces of bread to make it full
-    private static final float SPEED = 90f;
-    private static final float LEAVING_SPEED = 140f;
-
-    private final Student player;
-    private final float riverX, riverY;//Where it spawned so it can run back there.
-
-    private State state = State.CHASING;
-    private int hunger = 0;
+    private double distractTimer = 0;
+    private double distractX, distractY;
  
-    private float distractTimer = 0;
-    private float targetX, targetY;
+    private double eatTimer = 0; // stops to eat after being fed bread
  
- 
-    public Goose(World world, float x, float y, Student player) {
-        super(world, x, y, 40, 40);
-        this.player = player;
-        this.riverX = centerX();
-        this.riverY = centerY();
+    public Goose(double x, double y) {
+        super(x, y, 40, 40);
+        loadImage("images/goose.png");
     }
 
-    @Override
-    public Texture createTexture() {
-        return new Texture(Gdx.files.internal(ASSET));
-    }
-
-      public void distract(float tx, float ty, float seconds) {
-        if (state == State.LEAVING) return;
-        state = State.DISTRACTED;
-        targetX = tx;
-        targetY = ty;
+    public void distract(double targetX, double targetY, double seconds) {
+        distractX = targetX;
+        distractY = targetY;
         distractTimer = seconds;
     }
 
-    public void feed() {
-        if (state == State.LEAVING) return;
-        hunger++;
-        if (hunger >= HUNGER_TO_FILL) {
-            state = State.LEAVING;
+    public void feed(int damage) {
+        health = health - damage;
+        eatTimer = 2.0;
+    }
+
+    public boolean isEating() { return eatTimer > 0; }
+    public boolean isDead() { return health <= 0; }
+    public boolean isDistracted() { return distractTimer > 0; }
+
+    public void update(double dt, Student student) {
+        if (isDead()) return;
+ 
+        if (eatTimer > 0) {
+            eatTimer -= dt;
+            return;
+        }
+ 
+        double targetX, targetY;
+        if (distractTimer > 0) {
+            distractTimer -= dt;
+            targetX = distractX;
+            targetY = distractY;
+        } else {
+            targetX = student.centerX();
+            targetY = student.centerY();
+        }
+ 
+        double dx = targetX - centerX();
+        double dy = targetY - centerY();
+        double dist = Math.hypot(dx, dy);
+        if (dist > 1) {
+            x += (dx / dist) * speed * dt;
+            y += (dy / dist) * speed * dt;
         }
     }
 
     @Override
-    public void draw(SpriteBatch batch, float dt) {
-        switch (state) {
-            case CHASING:
-                moveTowards(player.centerX(), player.centerY(), SPEED, dt);
-                break;
- 
-            case DISTRACTED:
-                distractTimer -= dt;
-                if (distractTimer <= 0) {
-                    state = State.CHASING;
-                } else {
-                    moveTowards(targetX, targetY, SPEED, dt);
-                }
-                break;
- 
-            case LEAVING:
-                moveTowards(riverX, riverY, LEAVING_SPEED, dt);
-                if (distanceTo(riverX, riverY) < 5f) {
-                    destroy(); // it has run off the map
-                    return;
-                }
-                break;
+    public void draw(ShapeRenderer shapeRenderer) {
+        if (isDead()) {
+            shapeRenderer.setColor(0.4f, 0.4f, 0.4f, 1f);
+        } else if (isEating()) {
+            shapeRenderer.setColor(0.9f, 0.6f, 0.1f, 1f);
+        } else if (isDistracted()) {
+            shapeRenderer.setColor(1f, 1f, 0.2f, 1f);
+        } else {
+            shapeRenderer.setColor(0.9f, 0.2f, 0.2f, 1f);
         }
- 
-        super.draw(batch, dt);
+        super.draw(shapeRenderer);
     }
-
-      private void moveTowards(float tx, float ty, float speed, float dt) {
-        float dx = tx - centerX();
-        float dy = ty - centerY();
-        float dist = (float) Math.hypot(dx, dy);
-        if (dist > 1f) {
-            setX(getX() + dx / dist * speed * dt);
-            setY(getY() + dy / dist * speed * dt);
-        }
-    }
- 
-    //Geese currently in world.
-    public static List<Goose> inWorld(World world) {
-        List<Goose> geese = new ArrayList<Goose>();
-        for (Entity e : new ArrayList<Entity>(world.getEntities())) {
-            if (e instanceof Goose) {
-                geese.add((Goose) e);
-            }
-        }
-        return geese;
-    }
- 
-    public boolean canHurt() { return state == State.CHASING; }
-    public boolean isLeaving() { return state == State.LEAVING; }
-    public boolean isDistracted() { return state == State.DISTRACTED; }
-    public int getHunger() { return hunger; }
-    public float getHungerPercent() { return (float) hunger / HUNGER_TO_FILL; }
-
-
-
-
-
 }
