@@ -8,7 +8,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
  
 public class Student extends Entity {
  
-    public static final String ASSET = "player.png";
+    public static final String ASSET = "student.png";
  
     private static final int MAX_HEALTH = 100;
     private static final float SPEED = 150; // pixels per second
@@ -34,8 +34,8 @@ public class Student extends Entity {
  
     public Student(World world, float x, float y) {
         super(world, x, y, 32, 32);
-        inventory.setItem(0, new SeedBag()); // key 1 on keyboard
-        inventory.setItem(1, new Bread());   // key 2 on keyboard
+        inventory.setItem(0, new birdSeed()); // key 1 on keyboard
+        inventory.setItem(1, new breadCrumbs());   // key 2 on keyboard
     }
  
     @Override
