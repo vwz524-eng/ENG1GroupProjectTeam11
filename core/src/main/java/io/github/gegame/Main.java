@@ -9,7 +9,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.Timer;
-import io.github.gegame.escape.*;
 import io.github.gegame.hiddenevent.*;
 import io.github.gegame.interaction.ActionSpamFilter;
 import io.github.gegame.inventory.*;
@@ -67,9 +66,9 @@ public class Main extends ApplicationAdapter {
         student.setScore(0);
 
         // Initialize 5-minute timed escape countdown
-        countdownTimer = new CountdownTimer(300);
+        countdownTimer = new CountdownTimer();
         countdownTimer.start();
-        escapeObjective = new EscapeObjective(true);
+        escapeObjective = new EscapeObjective();
 
         pickups.clear();
         // Populate world with pickups for demonstration
@@ -148,7 +147,7 @@ public class Main extends ApplicationAdapter {
         gameTime += dt;
         handleInput(dt);
 
-        boolean isGameRunning = countdownTimer.getRunState().isRunning() && !student.isDead() && !escapeObjective.isCompleted();
+        boolean isGameRunning = countdownTimer.getRunState() == RunState.RUNNING && !student.isDead() && !escapeObjective.isSatisfied();
         HiddenEvent nearbyEvent = isGameRunning ? hiddenEventManager.checkProximity(student) : null;
 
         if (isGameRunning) {
@@ -173,7 +172,7 @@ public class Main extends ApplicationAdapter {
             // Check defeat conditions
             if (student.isDead()) {
                 countdownTimer.setRunState(RunState.CAUGHT);
-            } else if (countdownTimer.isExpired()) {
+            } else if (countdownTimer.getRunState() == RunState.TIME_EXPIRED) {
                 countdownTimer.expire();
             }
 
@@ -225,7 +224,7 @@ public class Main extends ApplicationAdapter {
         shapeRenderer.rect(20, 440, (float) (150 * student.getHealthPercent()), 16);
 
         // Pause Menu Backdrop (QR_PAUSE_MENU < 0.5s activation)
-        if (countdownTimer.getRunState().isPaused()) {
+        if (countdownTimer.getRunState() == RunState.PAUSED) {
             shapeRenderer.setColor(0.05f, 0.08f, 0.12f, 0.92f);
             shapeRenderer.rect(130, 90, 380, 300);
         }
@@ -290,16 +289,16 @@ public class Main extends ApplicationAdapter {
         font.draw(batch, "WASD: Move | 1-5: Slot | SPACE: Use | E: Interact | TAB: Diff | C: Colorblind | P: Pause | R: Reset", 10, 415);
 
         // Terminal State Messages & Pause Menu
-        if (escapeObjective.isCompleted()) {
+        if (escapeObjective.isSatisfied()) {
             font.setColor(Color.GREEN);
             font.draw(batch, "ESCAPED! You reached Central Hall in time! Press 'R' to play again.", 100, 260);
-        } else if (countdownTimer.isExpired()) {
+        } else if (countdownTimer.getRunState() == RunState.TIME_EXPIRED) {
             font.setColor(Color.RED);
             font.draw(batch, "TIME EXPIRED! You missed your lecture. Press 'R' to restart.", 110, 260);
         } else if (student.isDead()) {
             font.setColor(Color.RED);
             font.draw(batch, "CAUGHT! The geese defeated you. Press 'R' to restart.", 140, 260);
-        } else if (countdownTimer.getRunState().isPaused()) {
+        } else if (countdownTimer.getRunState() == RunState.PAUSED) {
             font.setColor(Color.GOLD);
             font.draw(batch, "=== PAUSE MENU ===", 250, 360);
             font.setColor(Color.WHITE);
@@ -335,14 +334,14 @@ public class Main extends ApplicationAdapter {
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
-            if (countdownTimer.getRunState().isRunning()) {
+            if (countdownTimer.getRunState() == RunState.RUNNING) {
                 countdownTimer.pause();
-            } else if (countdownTimer.getRunState().isPaused()) {
+            } else if (countdownTimer.getRunState() == RunState.PAUSED) {
                 countdownTimer.start();
             }
         }
 
-        if (!countdownTimer.getRunState().isRunning() || student.isDead() || escapeObjective.isCompleted()) {
+        if (countdownTimer.getRunState() != RunState.RUNNING || student.isDead() || escapeObjective.isSatisfied()) {
             return;
         }
 
