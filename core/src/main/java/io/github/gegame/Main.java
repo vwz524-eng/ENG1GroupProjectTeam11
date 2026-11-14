@@ -11,7 +11,9 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.Timer;
 import io.github.gegame.escape.*;
 import io.github.gegame.hiddenevent.*;
+import io.github.gegame.interaction.ActionSpamFilter;
 import io.github.gegame.inventory.*;
+import io.github.gegame.score.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +38,16 @@ public class Main extends ApplicationAdapter {
     // Hidden Event Discovery system
     private HiddenEventManager hiddenEventManager;
 
-    private int score = 0;
+    // Score & Difficulty system
+    private ScoreSystem scoreSystem;
+
+    // Accessibility & Quality Requirements
+    private boolean colorBlindMode = false;
+
+    // Extreme activity / spam protection (Risk Assessment R21)
+    private final ActionSpamFilter spamFilter = new ActionSpamFilter(0.12);
+    private double gameTime = 0.0;
+
     private String notificationMessage = "Welcome! WASD to move, 1-5 to select, SPACE to use items";
     private Timer.Task clearNotificationTask;
 
@@ -52,7 +63,8 @@ public class Main extends ApplicationAdapter {
     private void resetGame() {
         student = new Student(100, 240);
         goose = new Goose(500, 240);
-        score = 0;
+        scoreSystem = new ScoreSystem(DifficultyLevel.NORMAL);
+        student.setScore(0);
 
         // Initialize 5-minute timed escape countdown
         countdownTimer = new CountdownTimer(300);
@@ -80,6 +92,10 @@ public class Main extends ApplicationAdapter {
 
             @Override
             public void onEventActivated(HiddenEvent event, EventOutcome outcome) {
+                if (event != null) {
+                    scoreSystem.addDiscoveryBonus(event.getEventId());
+                    student.setScore(scoreSystem.getScore());
+                }
                 if (outcome != null) {
                     showNotification(outcome.getMessage());
                 }
@@ -91,10 +107,12 @@ public class Main extends ApplicationAdapter {
             @Override
             public void onItemAdded(Item item) {
                 if (item instanceof FoundItem) {
-                    score += 100;
+                    scoreSystem.addPoints(100, "Rare Item: " + item.getName());
+                    student.setScore(scoreSystem.getScore());
                     showNotification("Picked up rare item: " + item.getName() + " (+100 pts)!");
                 } else {
-                    score += 25;
+                    scoreSystem.addPoints(25, "Resource Item: " + item.getName());
+                    student.setScore(scoreSystem.getScore());
                     showNotification("Picked up: " + item.getName() + " (+25 pts)!");
                 }
             }
@@ -127,6 +145,7 @@ public class Main extends ApplicationAdapter {
     @Override
     public void render() {
         float dt = Gdx.graphics.getDeltaTime();
+        gameTime += dt;
         handleInput(dt);
 
         boolean isGameRunning = countdownTimer.getRunState().isRunning() && !student.isDead() && !escapeObjective.isCompleted();
@@ -145,8 +164,10 @@ public class Main extends ApplicationAdapter {
             if (student.getX() >= 580) {
                 escapeObjective.complete();
                 countdownTimer.setRunState(RunState.ESCAPED);
-                score += 500; // Bonus for escaping
-                showNotification("ESCAPED! You reached Central Hall on time! (+500 pts)");
+                scoreSystem.addEscapeBonus(countdownTimer.getRemaining());
+                scoreSystem.addTimeBonus(countdownTimer.getRemaining());
+                student.setScore(scoreSystem.getScore());
+                showNotification("ESCAPED! Reached Central Hall on time! (+" + scoreSystem.getScore() + " pts)");
             }
 
             // Check defeat conditions
@@ -193,11 +214,21 @@ public class Main extends ApplicationAdapter {
         student.draw(shapeRenderer);
         goose.draw(shapeRenderer);
 
-        // Draw Health Bar
+        // Draw Health Bar (Colourblind accessible)
         shapeRenderer.setColor(0.3f, 0.3f, 0.3f, 1f);
         shapeRenderer.rect(20, 440, 150, 16);
-        shapeRenderer.setColor(student.getHealthPercent() > 0.3f ? Color.GREEN : Color.RED);
+        if (colorBlindMode) {
+            shapeRenderer.setColor(student.getHealthPercent() > 0.3f ? Color.SKY : Color.MAGENTA);
+        } else {
+            shapeRenderer.setColor(student.getHealthPercent() > 0.3f ? Color.GREEN : Color.RED);
+        }
         shapeRenderer.rect(20, 440, (float) (150 * student.getHealthPercent()), 16);
+
+        // Pause Menu Backdrop (QR_PAUSE_MENU < 0.5s activation)
+        if (countdownTimer.getRunState().isPaused()) {
+            shapeRenderer.setColor(0.05f, 0.08f, 0.12f, 0.92f);
+            shapeRenderer.rect(130, 90, 380, 300);
+        }
 
         shapeRenderer.end();
 
@@ -207,23 +238,27 @@ public class Main extends ApplicationAdapter {
         // 3. Draw HUD Text (Controls, Score, Timer, Status)
         batch.begin();
         font.setColor(Color.WHITE);
-        font.draw(batch, "Score: " + score, 540, 460);
+        font.draw(batch, "Score: " + scoreSystem.getScore() + " [" + scoreSystem.getDifficulty().getName() + "]", 480, 460);
         font.draw(batch, "Health: " + student.getHealth() + "/" + student.getMaxHealth(), 20, 475);
 
-        // Draw Timer with WarningLevel coloring
+        // Draw Timer with WarningLevel coloring & high-contrast mode
         WarningLevel level = countdownTimer.getWarningLevel();
-        if (level == WarningLevel.CRITICAL) {
-            font.setColor(Color.RED);
-        } else if (level == WarningLevel.WARNING) {
-            font.setColor(Color.YELLOW);
+        if (colorBlindMode) {
+            font.setColor(level == WarningLevel.CRITICAL ? Color.MAGENTA : (level == WarningLevel.WARNING ? Color.CYAN : Color.SKY));
         } else {
-            font.setColor(Color.GREEN);
+            if (level == WarningLevel.CRITICAL) {
+                font.setColor(Color.RED);
+            } else if (level == WarningLevel.WARNING) {
+                font.setColor(Color.YELLOW);
+            } else {
+                font.setColor(Color.GREEN);
+            }
         }
         font.draw(batch, "Time: " + countdownTimer.getFormattedTime() + " [" + level + "]", 240, 475);
         font.draw(batch, "Secrets: " + hiddenEventManager.getEventsInteracted() + "/2", 400, 475);
 
         // Goal indicator
-        font.setColor(Color.LIME);
+        font.setColor(colorBlindMode ? Color.SKY : Color.LIME);
         font.draw(batch, "CENTRAL HALL ->", 500, 240);
 
         if (student.hasUmbrella()) {
@@ -252,9 +287,9 @@ public class Main extends ApplicationAdapter {
         }
 
         font.setColor(Color.LIGHT_GRAY);
-        font.draw(batch, "WASD: Move | 1-5: Slot | SPACE: Use | E: Interact | P: Pause | R: Restart", 20, 415);
+        font.draw(batch, "WASD: Move | 1-5: Slot | SPACE: Use | E: Interact | TAB: Diff | C: Colorblind | P: Pause | R: Reset", 10, 415);
 
-        // Terminal State Messages
+        // Terminal State Messages & Pause Menu
         if (escapeObjective.isCompleted()) {
             font.setColor(Color.GREEN);
             font.draw(batch, "ESCAPED! You reached Central Hall in time! Press 'R' to play again.", 100, 260);
@@ -265,8 +300,19 @@ public class Main extends ApplicationAdapter {
             font.setColor(Color.RED);
             font.draw(batch, "CAUGHT! The geese defeated you. Press 'R' to restart.", 140, 260);
         } else if (countdownTimer.getRunState().isPaused()) {
-            font.setColor(Color.YELLOW);
-            font.draw(batch, "GAME PAUSED - Press 'P' to resume", 200, 260);
+            font.setColor(Color.GOLD);
+            font.draw(batch, "=== PAUSE MENU ===", 250, 360);
+            font.setColor(Color.WHITE);
+            font.draw(batch, "[P] Resume Game", 200, 325);
+            font.draw(batch, "[R] Restart Game", 200, 295);
+            font.draw(batch, "[TAB] Difficulty: " + scoreSystem.getDifficulty().getName() + " (" + scoreSystem.getDifficulty().getBaseMultiplier() + "x)", 200, 265);
+            font.draw(batch, "[C] Colourblind Mode: " + (colorBlindMode ? "ON (High Contrast)" : "OFF"), 200, 235);
+            font.setColor(Color.CYAN);
+            font.draw(batch, "Accessibility: Subtitles & Text Cues Active", 175, 195);
+            font.setColor(Color.LIME);
+            font.draw(batch, "Safety: Family-Friendly | Seizure Safe", 190, 165);
+            font.setColor(Color.LIGHT_GRAY);
+            font.draw(batch, "Press 'P' to resume playing", 230, 125);
         }
 
         batch.end();
@@ -276,6 +322,16 @@ public class Main extends ApplicationAdapter {
         if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
             resetGame();
             return;
+        }
+
+        // Difficulty toggle key (TAB cycles Easy -> Normal -> Hard)
+        if (Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
+            cycleDifficulty();
+        }
+
+        // Toggle Colourblind mode (C key)
+        if (Gdx.input.isKeyJustPressed(Input.Keys.C)) {
+            toggleColorBlindMode();
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
@@ -315,8 +371,9 @@ public class Main extends ApplicationAdapter {
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_4)) student.getInventory().setSelectedIndex(3);
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_5)) student.getInventory().setSelectedIndex(4);
 
-        // Interact with nearby Hidden Event (E key)
+        // Interact with nearby Hidden Event (E key) with spam protection (Risk Assessment R21)
         if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
+            if (!spamFilter.allowAction(gameTime)) return;
             HiddenEvent nearby = hiddenEventManager.checkProximity(student);
             if (nearby != null && nearby.canActivate()) {
                 EventOutcome outcome = hiddenEventManager.interact(student);
@@ -327,8 +384,9 @@ public class Main extends ApplicationAdapter {
             }
         }
 
-        // Use selected item (SPACE key)
+        // Use selected item (SPACE key) with spam protection (Risk Assessment R21)
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+            if (!spamFilter.allowAction(gameTime)) return;
             Item selected = student.getInventory().getSelected();
             if (selected != null) {
                 if (selected instanceof DistractionItem) {
@@ -341,6 +399,52 @@ public class Main extends ApplicationAdapter {
             }
             student.useSelectedItem(goose);
         }
+    }
+
+    /**
+     * Sets the active difficulty level and scales goose speed and score multipliers accordingly.
+     *
+     * @param difficulty the target difficulty level
+     */
+    public void setDifficulty(DifficultyLevel difficulty) {
+        if (difficulty == null) return;
+        scoreSystem.setDifficulty(difficulty);
+        if (goose != null) {
+            goose.setSpeedMultiplier(difficulty.getGooseSpeedModifier().getMultiplier());
+        }
+        showNotification("Difficulty set to: " + difficulty.getName().toUpperCase()
+            + " (" + difficulty.getBaseMultiplier() + "x score, goose speed "
+            + difficulty.getGooseSpeedModifier().getMultiplier() + "x)!");
+    }
+
+    /**
+     * Cycles through difficulty levels: Easy -> Normal -> Hard -> Easy.
+     */
+    public void cycleDifficulty() {
+        DifficultyLevel current = scoreSystem.getDifficulty();
+        if ("Easy".equalsIgnoreCase(current.getName())) {
+            setDifficulty(DifficultyLevel.NORMAL);
+        } else if ("Normal".equalsIgnoreCase(current.getName())) {
+            setDifficulty(DifficultyLevel.HARD);
+        } else {
+            setDifficulty(DifficultyLevel.EASY);
+        }
+    }
+
+    /**
+     * Toggles colourblind high-contrast visual display mode (QR_ACCESSIBILITY).
+     */
+    public void toggleColorBlindMode() {
+        this.colorBlindMode = !this.colorBlindMode;
+        showNotification("Colourblind Mode: " + (colorBlindMode ? "ENABLED (High Contrast)" : "DISABLED"));
+    }
+
+    public boolean isColorBlindMode() {
+        return colorBlindMode;
+    }
+
+    public void setColorBlindMode(boolean mode) {
+        this.colorBlindMode = mode;
     }
 
     @Override

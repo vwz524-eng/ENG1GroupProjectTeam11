@@ -4,7 +4,8 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 public class Goose extends Sprite {
     private int health = 30;
-    private final double speed = 90;
+    private double baseSpeed = 90;
+    private double speedMultiplier = 1.0;
  
     private double distractTimer = 0;
     private double distractX, distractY;
@@ -53,9 +54,22 @@ public class Goose extends Sprite {
         double dy = targetY - centerY();
         double dist = Math.hypot(dx, dy);
         if (dist > 1) {
-            x += (dx / dist) * speed * dt;
-            y += (dy / dist) * speed * dt;
+            double currentSpeed = getSpeed();
+            x += (dx / dist) * currentSpeed * dt;
+            y += (dy / dist) * currentSpeed * dt;
         }
+    }
+
+    public double getSpeed() {
+        return baseSpeed * speedMultiplier;
+    }
+
+    public void setSpeedMultiplier(double speedMultiplier) {
+        this.speedMultiplier = speedMultiplier > 0 ? speedMultiplier : 1.0;
+    }
+
+    public double getSpeedMultiplier() {
+        return speedMultiplier;
     }
 
     @Override
