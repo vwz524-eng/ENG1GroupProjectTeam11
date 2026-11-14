@@ -12,6 +12,7 @@ import com.badlogic.gdx.utils.Timer;
 import io.github.gegame.escape.*;
 import io.github.gegame.hiddenevent.*;
 import io.github.gegame.inventory.*;
+import io.github.gegame.score.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +37,9 @@ public class Main extends ApplicationAdapter {
     // Hidden Event Discovery system
     private HiddenEventManager hiddenEventManager;
 
-    private int score = 0;
+    // Score & Difficulty system
+    private ScoreSystem scoreSystem;
+
     private String notificationMessage = "Welcome! WASD to move, 1-5 to select, SPACE to use items";
     private Timer.Task clearNotificationTask;
 
@@ -52,7 +55,8 @@ public class Main extends ApplicationAdapter {
     private void resetGame() {
         student = new Student(100, 240);
         goose = new Goose(500, 240);
-        score = 0;
+        scoreSystem = new ScoreSystem(DifficultyLevel.NORMAL);
+        student.setScore(0);
 
         // Initialize 5-minute timed escape countdown
         countdownTimer = new CountdownTimer(300);
@@ -80,6 +84,10 @@ public class Main extends ApplicationAdapter {
 
             @Override
             public void onEventActivated(HiddenEvent event, EventOutcome outcome) {
+                if (event != null) {
+                    scoreSystem.addDiscoveryBonus(event.getEventId());
+                    student.setScore(scoreSystem.getScore());
+                }
                 if (outcome != null) {
                     showNotification(outcome.getMessage());
                 }
@@ -91,10 +99,12 @@ public class Main extends ApplicationAdapter {
             @Override
             public void onItemAdded(Item item) {
                 if (item instanceof FoundItem) {
-                    score += 100;
+                    scoreSystem.addPoints(100, "Rare Item: " + item.getName());
+                    student.setScore(scoreSystem.getScore());
                     showNotification("Picked up rare item: " + item.getName() + " (+100 pts)!");
                 } else {
-                    score += 25;
+                    scoreSystem.addPoints(25, "Resource Item: " + item.getName());
+                    student.setScore(scoreSystem.getScore());
                     showNotification("Picked up: " + item.getName() + " (+25 pts)!");
                 }
             }
@@ -145,8 +155,10 @@ public class Main extends ApplicationAdapter {
             if (student.getX() >= 580) {
                 escapeObjective.complete();
                 countdownTimer.setRunState(RunState.ESCAPED);
-                score += 500; // Bonus for escaping
-                showNotification("ESCAPED! You reached Central Hall on time! (+500 pts)");
+                scoreSystem.addEscapeBonus(countdownTimer.getRemaining());
+                scoreSystem.addTimeBonus(countdownTimer.getRemaining());
+                student.setScore(scoreSystem.getScore());
+                showNotification("ESCAPED! Reached Central Hall on time! (+" + scoreSystem.getScore() + " pts)");
             }
 
             // Check defeat conditions
@@ -207,7 +219,7 @@ public class Main extends ApplicationAdapter {
         // 3. Draw HUD Text (Controls, Score, Timer, Status)
         batch.begin();
         font.setColor(Color.WHITE);
-        font.draw(batch, "Score: " + score, 540, 460);
+        font.draw(batch, "Score: " + scoreSystem.getScore() + " [" + scoreSystem.getDifficulty().getName() + "]", 480, 460);
         font.draw(batch, "Health: " + student.getHealth() + "/" + student.getMaxHealth(), 20, 475);
 
         // Draw Timer with WarningLevel coloring
