@@ -3,13 +3,22 @@ package io.github.gegame;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
+import io.github.gegame.animation.AnimState;
+import io.github.gegame.animation.Direction;
+import io.github.gegame.animation.SpriteAnimator;
 
 public abstract class Sprite {
     protected double x, y;
     protected int width, height;
     protected Texture texture;
+
+    // animation support, remains null for sprites that don't call/use initAnimator()
+    protected SpriteAnimator animator;
+    // which way the sprite faces, subclasses update this as they move
+    protected Direction facing = Direction.DOWN;
 
     public Sprite(double x, double y, int width, int height) {
         this.x = x;
@@ -35,12 +44,43 @@ public abstract class Sprite {
     }
 
     /**
-     * Draws the sprite texture using SpriteBatch.
+     * Turns on directional sprite-sheet animation for this entity.
+     * Call from the subclass constructor, then chain register(...) for each state:
+     * <pre>
+     *   initAnimator("geese", "goose")
+     *       .register(State.IDLE, SpriteAnimator.AUTO, 0.2f, true);
+     * </pre>
+     *
+     * @param folder folder inside assets/ (e.g. "geese")
+     * @param prefix start of every filename in that folder (e.g. "goose")
+     */
+    protected SpriteAnimator initAnimator(String folder, String prefix) {
+        animator = new SpriteAnimator(folder, prefix);
+        return animator;
+    }
+
+    /**
+     * Picks the animation for the given state (using the current {@link #facing})
+     * and advances it. Call once per update.
+     */
+    protected void updateAnimation(AnimState state, double dt) {
+        if (animator == null) return;
+        animator.play(state, facing);
+        animator.update(dt);
+    }
+
+    /**
+     * Draws the current animation frame if there is one, otherwise the static texture.
      *
      * @param batch the active SpriteBatch
      */
     public void draw(SpriteBatch batch) {
-        if (texture != null && batch != null) {
+        if (batch == null) return;
+
+        TextureRegion frame = animator != null ? animator.getFrame() : null;
+        if (frame != null) {
+            batch.draw(frame, (float) x, (float) y, (float) width, (float) height);
+        } else if (texture != null) {
             batch.draw(texture, (float) x, (float) y, (float) width, (float) height);
         }
     }
@@ -82,6 +122,10 @@ public abstract class Sprite {
             texture.dispose();
             texture = null;
         }
+        if (animator != null) {
+            animator.dispose();
+            animator = null;
+        }
     }
 
     public double getX() { return x; }
@@ -92,5 +136,10 @@ public abstract class Sprite {
     public int getWidth() { return width; }
     public int getHeight() { return height; }
     public Texture getTexture() { return texture; }
-    public boolean hasTexture() { return texture != null; }
+    public Direction getFacing() { return facing; }
+
+    /** True if there is anything to draw with the SpriteBatch (static texture or loaded animations). */
+    public boolean hasTexture() {
+        return texture != null || (animator != null && animator.hasFrames());
+    }
 }

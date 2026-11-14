@@ -50,6 +50,10 @@ public class Main extends ApplicationAdapter {
     }
 
     private void resetGame() {
+        // Free the old entities' textures so restarting (R) doesn't leak GPU memory
+        if (student != null) student.dispose();
+        if (goose != null) goose.dispose();
+
         student = new Student(100, 240);
         goose = new Goose(500, 240);
         score = 0;
@@ -189,9 +193,9 @@ public class Main extends ApplicationAdapter {
             }
         }
 
-        // Draw Student and Goose
-        student.draw(shapeRenderer);
-        goose.draw(shapeRenderer);
+        // Fallback for entities who fail to load
+        if (!goose.hasTexture()) goose.draw(shapeRenderer);
+        if (!student.hasTexture()) student.draw(shapeRenderer);
 
         // Draw Health Bar
         shapeRenderer.setColor(0.3f, 0.3f, 0.3f, 1f);
@@ -200,6 +204,12 @@ public class Main extends ApplicationAdapter {
         shapeRenderer.rect(20, 440, (float) (150 * student.getHealthPercent()), 16);
 
         shapeRenderer.end();
+
+        // 1b. Draw animated sprites (goose first so the student renders on top)
+        batch.begin();
+        goose.draw(batch);
+        student.draw(batch);
+        batch.end();
 
         // 2. Draw Inventory HUD
         inventoryUI.render(shapeRenderer, batch, font);
