@@ -5,16 +5,16 @@ import io.github.gegame.inventory.Inventory;
 
 /**
  * Outcome triggered by interacting with the tree outside Central Hall.
- * Restores player health by doubling remaining health points (capped at 20).
+ * Reveals Allergy Medication that heals the player by 50 health points.
  */
 public class TreeEventOutcome extends EventOutcome {
 
-    public static final int MAX_RESTORE_CAP = 20;
+    public static final int HEAL_AMOUNT = AllergyMedicationItem.HEAL_AMOUNT;
 
     public TreeEventOutcome() {
         super(
-            "Restores player health (Doubles remaining health up to 20)",
-            "You investigated the tree and found allergy medication! Health has doubled.",
+            "Reveals Allergy Medication (Heals 50 health)",
+            "You investigated the tree and found Allergy Medication! Use it to heal 50 HP.",
             150
         );
         setRevealedItem(new AllergyMedicationItem());
@@ -22,15 +22,6 @@ public class TreeEventOutcome extends EventOutcome {
 
     @Override
     public void apply(Player player, Inventory inventory) {
-        if (player != null) {
-            int currentHealth = player.getHealth();
-            int cap = Math.min(MAX_RESTORE_CAP, player.getMaxHealth());
-            int doubled = Math.min(cap, currentHealth * 2);
-            int restoredAmount = doubled - currentHealth;
-            if (restoredAmount > 0) {
-                setHealthRestored(restoredAmount);
-            }
-        }
         super.apply(player, inventory);
     }
 }

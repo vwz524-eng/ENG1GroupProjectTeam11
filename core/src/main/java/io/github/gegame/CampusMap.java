@@ -149,6 +149,10 @@ public class CampusMap {
         for (MapObject object : collisionLayer.getObjects()) {
 
             if (object instanceof RectangleMapObject) {
+                String name = object.getName();
+                if ("Tree".equalsIgnoreCase(name) || "LongboiBase".equalsIgnoreCase(name)) {
+                    continue;
+                }
 
                 Rectangle obstacle =
                     ((RectangleMapObject) object).getRectangle();

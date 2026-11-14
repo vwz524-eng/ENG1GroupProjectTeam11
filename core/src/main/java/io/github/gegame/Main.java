@@ -30,7 +30,7 @@ public class Main extends Game {
     private CampusMap campusMap;
 
     private Student student;
-    private Goose goose;
+    private final List<Goose> geese = new ArrayList<>();
     private final List<ItemPickup> pickups = new ArrayList<>();
     private InventoryUI inventoryUI;
 
@@ -59,6 +59,8 @@ public class Main extends Game {
     private static final float STUDENT_HITBOX_OFFSET_Y = 6f;
     private static final float STUDENT_HITBOX_WIDTH = 24f;
     private static final float STUDENT_HITBOX_HEIGHT = 20f;
+    private static final int CENTRAL_HALL_UNLOCK_SECONDS = 60;
+    private boolean wasTouchingLockedCentralHall = false;
 
     private String notificationMessage = "Welcome! WASD to move, 1-5 to select, SPACE to use items";
     private Timer.Task clearNotificationTask;
@@ -90,14 +92,17 @@ public class Main extends Game {
     private void resetGame() {
         // Free the old entities' textures so restarting (R) doesn't leak GPU memory
         if (student != null) student.dispose();
-        if (goose != null) goose.dispose();
+        for (Goose g : geese) {
+            g.dispose();
+        }
+        geese.clear();
         if (hiddenEventManager != null) hiddenEventManager.dispose();
 
         student = new Student(100, 240);
-        goose = new Goose(500, 240);
+        spawnGeeseForDifficulty();
         scoreSystem = new ScoreSystem(selectedDifficulty);
-        goose.setSpeedMultiplier(selectedDifficulty.getGooseSpeedModifier().getMultiplier());
         student.setScore(0);
+        wasTouchingLockedCentralHall = false;
 
         // Initialize 5-minute timed escape countdown
         countdownTimer = new CountdownTimer(300);
@@ -157,7 +162,79 @@ public class Main extends Game {
             }
         });
 
-        showNotification("Escape to Central Hall before the 5-minute timer expires!");
+        showNotification("Escape to Central Hall after 1 minute (before the 5-minute timer expires)!");
+    }
+
+    private void spawnGeeseForDifficulty() {
+        int gooseCount = getGooseCountForDifficulty(selectedDifficulty);
+        float[][] spawnPoints = {
+            {480f, 240f},
+            {340f, 340f},
+            {360f, 120f}
+        };
+        double speedMultiplier = selectedDifficulty.getGooseSpeedModifier().getMultiplier();
+        for (int i = 0; i < gooseCount; i++) {
+            Goose g = new Goose(spawnPoints[i][0], spawnPoints[i][1]);
+            g.setSpeedMultiplier(speedMultiplier);
+            geese.add(g);
+        }
+    }
+
+    private int getGooseCountForDifficulty(DifficultyLevel difficulty) {
+        if (difficulty == null) return 2;
+        if ("Hard".equalsIgnoreCase(difficulty.getName())) return 3;
+        if ("Normal".equalsIgnoreCase(difficulty.getName())) return 2;
+        return 1;
+    }
+
+    /**
+     * Resolves solid collision between geese so multiple geese do not stack on top of each other,
+     * while leaving student-goose movement unobstructed.
+     */
+    private void resolveGooseCollisions() {
+        final double minSeparation = 30.0;
+        for (int pass = 0; pass < 2; pass++) {
+            for (int i = 0; i < geese.size(); i++) {
+                Goose g1 = geese.get(i);
+                if (g1 == null || g1.isDead()) continue;
+
+                for (int j = i + 1; j < geese.size(); j++) {
+                    Goose g2 = geese.get(j);
+                    if (g2 == null || g2.isDead()) continue;
+
+                    double dx = g2.centerX() - g1.centerX();
+                    double dy = g2.centerY() - g1.centerY();
+                    double dist = Math.hypot(dx, dy);
+                    if (dist >= minSeparation) continue;
+
+                    double nx = dist < 0.001 ? 1.0 : dx / dist;
+                    double ny = dist < 0.001 ? 0.0 : dy / dist;
+                    double overlap = minSeparation - dist;
+
+                    boolean g1Eating = g1.isEating();
+                    boolean g2Eating = g2.isEating();
+
+                    if (g1Eating && !g2Eating) {
+                        g2.setPosition(g2.getX() + nx * overlap, g2.getY() + ny * overlap);
+                    } else if (g2Eating && !g1Eating) {
+                        g1.setPosition(g1.getX() - nx * overlap, g1.getY() - ny * overlap);
+                    } else {
+                        double half = overlap * 0.5;
+                        g1.setPosition(g1.getX() - nx * half, g1.getY() - ny * half);
+                        g2.setPosition(g2.getX() + nx * half, g2.getY() + ny * half);
+                    }
+
+                    g1.setPosition(
+                        Math.max(0, Math.min(640 - g1.getWidth(), g1.getX())),
+                        Math.max(0, Math.min(480 - g1.getHeight(), g1.getY()))
+                    );
+                    g2.setPosition(
+                        Math.max(0, Math.min(640 - g2.getWidth(), g2.getX())),
+                        Math.max(0, Math.min(480 - g2.getHeight(), g2.getY()))
+                    );
+                }
+            }
+        }
     }
 
     public void showNotification(String message) {
@@ -193,22 +270,36 @@ public class Main extends Game {
 
             // Update entities
             student.update(dt);
-            goose.update(dt, student);
-            student.checkGooseCollision(goose);
-
-            // Check if player reaches Central Hall entrance or right exit zone
-            double studentCenterX = student.getX() + student.getWidth() / 2.0;
-            double studentCenterY = student.getY() + student.getHeight() / 2.0;
-            boolean reachedCentralHall = student.getX() >= 580
-                || (studentCenterX >= 500 && studentCenterY >= 200 && studentCenterY <= 300);
-            if (reachedCentralHall) {
-                escapeObjective.complete();
-                countdownTimer.setRunState(RunState.ESCAPED);
-                scoreSystem.addEscapeBonus(countdownTimer.getRemaining());
-                scoreSystem.addTimeBonus(countdownTimer.getRemaining());
-                student.setScore(scoreSystem.getScore());
-                showNotification("ESCAPED! Reached Central Hall on time! (+" + scoreSystem.getScore() + " pts)");
+            for (Goose g : geese) {
+                g.update(dt, student);
             }
+            resolveGooseCollisions();
+            for (Goose g : geese) {
+                student.checkGooseCollision(g);
+            }
+
+            // Win only after 1 minute has elapsed AND player touches Central Hall
+            int elapsedSeconds = countdownTimer.getDuration() - countdownTimer.getRemaining();
+            boolean centralHallUnlocked = elapsedSeconds >= CENTRAL_HALL_UNLOCK_SECONDS;
+            double hitboxRight = student.getX() + STUDENT_HITBOX_OFFSET_X + STUDENT_HITBOX_WIDTH;
+            double hitboxBottom = student.getY() + STUDENT_HITBOX_OFFSET_Y;
+            double hitboxTop = hitboxBottom + STUDENT_HITBOX_HEIGHT;
+            boolean touchingCentralHall = student.getX() >= 580
+                || (hitboxRight >= 520 && hitboxTop >= 200 && hitboxBottom <= 301);
+            if (touchingCentralHall) {
+                if (centralHallUnlocked) {
+                    escapeObjective.complete();
+                    countdownTimer.setRunState(RunState.ESCAPED);
+                    scoreSystem.addEscapeBonus(countdownTimer.getRemaining());
+                    scoreSystem.addTimeBonus(countdownTimer.getRemaining());
+                    student.setScore(scoreSystem.getScore());
+                    showNotification("ESCAPED! Reached Central Hall on time! (+" + scoreSystem.getScore() + " pts)");
+                } else if (!wasTouchingLockedCentralHall) {
+                    int secondsLeft = CENTRAL_HALL_UNLOCK_SECONDS - elapsedSeconds;
+                    showNotification("Central Hall is locked! Survive " + secondsLeft + "s more to enter!");
+                }
+            }
+            wasTouchingLockedCentralHall = touchingCentralHall && !centralHallUnlocked;
 
             // Check defeat conditions
             if (student.isDead()) {
@@ -251,7 +342,9 @@ public class Main extends Game {
         }
 
         // Fallback for entities who fail to load
-        if (!goose.hasTexture()) goose.draw(shapeRenderer);
+        for (Goose g : geese) {
+            if (!g.hasTexture()) g.draw(shapeRenderer);
+        }
         if (!student.hasTexture()) student.draw(shapeRenderer);
 
         // Draw Health Bar (Colourblind accessible)
@@ -275,7 +368,9 @@ public class Main extends Game {
         // 1b. Draw world textures and animated sprites (goose first so the student renders on top)
         batch.begin();
         hiddenEventManager.draw(batch);
-        goose.draw(batch);
+        for (Goose g : geese) {
+            g.draw(batch);
+        }
         student.draw(batch);
         batch.end();
 
@@ -305,18 +400,30 @@ public class Main extends Game {
         font.draw(batch, "Secrets: " + hiddenEventManager.getEventsInteracted() + "/2", 400, 475);
 
         // Goal indicator
-        font.setColor(colorBlindMode ? Color.SKY : Color.LIME);
-        font.draw(batch, "CENTRAL HALL ->", 500, 240);
+        int elapsedSeconds = countdownTimer.getDuration() - countdownTimer.getRemaining();
+        if (elapsedSeconds < CENTRAL_HALL_UNLOCK_SECONDS) {
+            font.setColor(colorBlindMode ? Color.CYAN : Color.ORANGE);
+            font.draw(batch, "CENTRAL HALL (" + (CENTRAL_HALL_UNLOCK_SECONDS - elapsedSeconds) + "s)", 465, 240);
+        } else {
+            font.setColor(colorBlindMode ? Color.SKY : Color.LIME);
+            font.draw(batch, "CENTRAL HALL ->", 500, 240);
+        }
 
         if (student.hasUmbrella()) {
             font.setColor(Color.CYAN);
             font.draw(batch, "Umbrella: " + String.format("%.1fs", student.getUmbrellaTimeLeft()), 20, 400);
         }
 
-        if (goose.isDistracted()) {
+        boolean anyDistracted = false;
+        boolean anyEating = false;
+        for (Goose g : geese) {
+            if (g.isDistracted()) anyDistracted = true;
+            if (g.isEating()) anyEating = true;
+        }
+        if (anyDistracted) {
             font.setColor(Color.YELLOW);
             font.draw(batch, "Goose Distracted!", 500, 430);
-        } else if (goose.isEating()) {
+        } else if (anyEating) {
             font.setColor(Color.ORANGE);
             font.draw(batch, "Goose Eating!", 500, 430);
         }
@@ -455,16 +562,20 @@ public class Main extends Game {
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
             if (!spamFilter.allowAction(gameTime)) return;
             Item selected = student.getInventory().getSelected();
-            if (selected != null) {
+            if (selected != null && !selected.isUsedUp()) {
                 if (selected instanceof DistractionItem) {
                     showNotification("Threw Seeds! Goose is distracted for 5s!");
                 } else if (selected instanceof FeedItem) {
                     showNotification("Fed Goose Bread! Goose is eating for 2s!");
                 } else if (selected instanceof FoundItem) {
-                    showNotification("Used " + selected.getName() + "!");
+                    if (selected instanceof AllergyMedicationItem) {
+                        showNotification("Used Allergy Medication! Healed +50 HP!");
+                    } else {
+                        showNotification("Used " + selected.getName() + "!");
+                    }
                 }
             }
-            student.useSelectedItem(goose);
+            student.useSelectedItem(geese);
         }
     }
 
@@ -479,8 +590,8 @@ public class Main extends Game {
         if (scoreSystem != null) {
             scoreSystem.setDifficulty(difficulty);
         }
-        if (goose != null) {
-            goose.setSpeedMultiplier(difficulty.getGooseSpeedModifier().getMultiplier());
+        for (Goose g : geese) {
+            g.setSpeedMultiplier(difficulty.getGooseSpeedModifier().getMultiplier());
         }
         showNotification("Difficulty set to: " + difficulty.getName().toUpperCase()
             + " (" + difficulty.getBaseMultiplier() + "x score, goose speed "
@@ -536,7 +647,9 @@ public class Main extends Game {
         if (shapeRenderer != null) shapeRenderer.dispose();
         if (font != null) font.dispose();
         if (student != null) student.dispose();
-        if (goose != null) goose.dispose();
+        for (Goose g : geese) {
+            g.dispose();
+        }
         if (hiddenEventManager != null) hiddenEventManager.dispose();
         if (campusMap != null) campusMap.dispose();
     }

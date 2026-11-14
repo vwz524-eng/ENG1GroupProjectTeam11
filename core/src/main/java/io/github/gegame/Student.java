@@ -11,6 +11,8 @@ import io.github.gegame.inventory.FeedItem;
 import io.github.gegame.inventory.InitialInventory;
 import io.github.gegame.inventory.Inventory;
 import io.github.gegame.inventory.Item;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Student extends Player {
 
@@ -63,6 +65,65 @@ public class Student extends Player {
                 throwTimer = THROW_SECONDS; // thrown items get the throw pose; the umbrella doesn't
             }
         }
+    }
+
+    public void useSelectedItem(List<Goose> geese) {
+        Item item = inventory.getSelected();
+        if (item == null || item.isUsedUp()) {
+            return;
+        }
+
+        if (item instanceof DistractionItem) {
+            DistractionItem distraction = (DistractionItem) item;
+            double targetX = getX() + getFacingX() * 50.0;
+            double targetY = getY() + getFacingY() * 50.0;
+            List<Goose> livingGeese = new ArrayList<>();
+            if (geese != null) {
+                for (Goose g : geese) {
+                    if (g != null && !g.isDead()) {
+                        livingGeese.add(g);
+                    }
+                }
+            }
+            int count = livingGeese.size();
+            for (int i = 0; i < count; i++) {
+                double offsetX = (i - (count - 1) / 2.0) * 32.0;
+                double gx = Math.max(16.0, Math.min(624.0, targetX + offsetX));
+                double gy = Math.max(16.0, Math.min(464.0, targetY));
+                livingGeese.get(i).distract(gx, gy, distraction.getDuration());
+            }
+            distraction.consume();
+            throwTimer = THROW_SECONDS;
+        } else if (item instanceof FeedItem) {
+            FeedItem feed = (FeedItem) item;
+            Goose target = findNearestLivingGoose(geese);
+            if (target != null) {
+                target.feed(feed.getFeedAmount());
+            }
+            feed.consume();
+            throwTimer = THROW_SECONDS;
+        } else {
+            item.use(this);
+        }
+    }
+
+    private Goose findNearestLivingGoose(List<Goose> geese) {
+        if (geese == null || geese.isEmpty()) {
+            return null;
+        }
+        Goose nearest = null;
+        double bestDist = Double.MAX_VALUE;
+        for (Goose g : geese) {
+            if (g == null || g.isDead()) {
+                continue;
+            }
+            double dist = Math.hypot(g.centerX() - centerX(), g.centerY() - centerY());
+            if (dist < bestDist) {
+                bestDist = dist;
+                nearest = g;
+            }
+        }
+        return nearest;
     }
 
     public void update(double dt) {
