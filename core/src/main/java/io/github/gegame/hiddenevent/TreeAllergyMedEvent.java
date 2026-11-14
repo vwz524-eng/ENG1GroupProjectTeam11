@@ -10,7 +10,7 @@ public class TreeAllergyMedEvent extends HiddenEvent {
     public TreeAllergyMedEvent(double x, double y) {
         super("tree_allergy_med", "TREE", "Investigate tree", x, y, 65.0);
         setOutcome(new TreeEventOutcome());
-        setReward(new DiscoveryReward(150, "You found allergy medication under the tree!"));
+        setReward(new DiscoveryReward(150, "You found medication under the tree!"));
     }
 
     public TreeAllergyMedEvent() {

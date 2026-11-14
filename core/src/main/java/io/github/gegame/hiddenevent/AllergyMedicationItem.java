@@ -23,7 +23,7 @@ public class AllergyMedicationItem extends FoundItem {
     private MedicationState state;
 
     public AllergyMedicationItem() {
-        super("allergy_medication", "Allergy Medication", "Heals 50 health up to maximum health. Single use.", true);
+        super("allergy_medication", "Medication", "Heals 50 health up to maximum health. Single use.", true);
         this.state = MedicationState.COLLECTED;
     }
 

@@ -67,12 +67,18 @@ public class InventoryUI {
 
                 Item item = inventory.getItem(i);
                 if (item != null) {
-                    font.setColor(Color.WHITE);
+                    boolean breadCooldown = item instanceof Bread && ((Bread) item).isOnCooldown();
+                    font.setColor(breadCooldown ? Color.ORANGE : Color.WHITE);
                     String name = item.getName();
                     if (name.length() > 6) {
                         name = name.substring(0, 5) + ".";
                     }
                     font.draw(batch, name, slotX + 4, y + 22);
+                    if (breadCooldown) {
+                        int secs = (int) Math.ceil(((Bread) item).getCooldownRemaining());
+                        font.setColor(Color.YELLOW);
+                        font.draw(batch, secs + "s", slotX + 26, y + slotSize - 4);
+                    }
                 }
             }
 
@@ -80,7 +86,12 @@ public class InventoryUI {
             Item active = inventory.getSelected();
             if (active != null) {
                 font.setColor(Color.GOLD);
-                font.draw(batch, "[" + (selected + 1) + "] " + active.getName() + " - " + active.getDescription(), x, y + slotSize + 22);
+                String statusSuffix = "";
+                if (active instanceof Bread && ((Bread) active).isOnCooldown()) {
+                    int secs = (int) Math.ceil(((Bread) active).getCooldownRemaining());
+                    statusSuffix = " (Cooldown: " + secs + "s)";
+                }
+                font.draw(batch, "[" + (selected + 1) + "] " + active.getName() + statusSuffix + " - " + active.getDescription(), x, y + slotSize + 22);
             } else {
                 font.setColor(Color.GRAY);
                 font.draw(batch, "[" + (selected + 1) + "] Empty Slot", x, y + slotSize + 22);

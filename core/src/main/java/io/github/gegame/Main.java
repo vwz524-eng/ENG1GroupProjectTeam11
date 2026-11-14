@@ -440,6 +440,15 @@ public class Main extends Game {
         student.draw(batch);
         batch.end();
 
+        // 1c. Draw hunger bar above each living goose
+        if (!countdownTimer.getRunState().isPaused()) {
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+            for (Goose g : geese) {
+                g.drawHungerBar(shapeRenderer, colorBlindMode);
+            }
+            shapeRenderer.end();
+        }
+
         // 2. Draw Inventory HUD
         inventoryUI.render(shapeRenderer, batch, font);
 
@@ -629,6 +638,11 @@ public class Main extends Game {
             if (!spamFilter.allowAction(gameTime)) return;
             Item selected = student.getInventory().getSelected();
             if (selected != null && !selected.isUsedUp()) {
+                if (selected instanceof Bread && ((Bread) selected).isOnCooldown()) {
+                    int secs = (int) Math.ceil(((Bread) selected).getCooldownRemaining());
+                    showNotification("Bread is recharging! " + secs + "s left!");
+                    return;
+                }
                 if (selected instanceof DistractionItem) {
                     showNotification("Threw Seeds! Goose is distracted for 5s!");
                     playDuckQuack();
@@ -637,7 +651,7 @@ public class Main extends Game {
                     playDuckQuack();
                 } else if (selected instanceof FoundItem) {
                     if (selected instanceof AllergyMedicationItem) {
-                        showNotification("Used Allergy Medication! Healed +50 HP!");
+                        showNotification("Used Medication! Healed +50 HP!");
                     } else {
                         showNotification("Used " + selected.getName() + "!");
                     }
