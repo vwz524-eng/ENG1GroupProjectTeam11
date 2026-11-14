@@ -26,7 +26,18 @@ public class Goose extends Sprite {
         public String fileToken() { return token; }
     }
 
+    public static final int MAX_HUNGER = 100;
+    private static final int STARTING_HUNGER = 20;
+    private static final double HUNGER_INCREASE_INTERVAL = 2.0;
+    private static final int HUNGER_INCREASE_AMOUNT = 5;
+    public static final int HIGH_HUNGER_THRESHOLD = 70;
+    private static final double HIGH_HUNGER_SPEED_MULTIPLIER = 1.4;
+    private static final int BREAD_HUNGER_REDUCTION = 40;
+    private static final int SEED_HUNGER_REDUCTION = 30;
+
     private int health = 30;
+    private int hunger = STARTING_HUNGER;
+    private double hungerTimer = 0.0;
     private double baseSpeed = 90;
     private double speedMultiplier = 1.0;
 
@@ -37,6 +48,7 @@ public class Goose extends Sprite {
     private double distractTimer = 0;
     private double distractX, distractY;
     private boolean eatingSeeds = false;
+    private boolean seedHungerReduced = false;
 
     private double eatTimer = 0; // stops to eat after being fed bread
 
@@ -58,12 +70,30 @@ public class Goose extends Sprite {
         distractY = targetY;
         distractTimer = seconds;
         eatingSeeds = false;
+        seedHungerReduced = false;
     }
 
-    public void feed(int damage) {
-        health = health - damage;
+    public void feed(int amount) {
         eatTimer = 2.0;
+        reduceHunger(Math.max(BREAD_HUNGER_REDUCTION, amount));
     }
+
+    public void reduceHunger(int amount) {
+        if (amount > 0) {
+            hunger = Math.max(0, hunger - amount);
+        }
+    }
+
+    public void increaseHunger(int amount) {
+        if (amount > 0) {
+            hunger = Math.min(MAX_HUNGER, hunger + amount);
+        }
+    }
+
+    public int getHunger() { return hunger; }
+    public int getMaxHunger() { return MAX_HUNGER; }
+    public double getHungerPercent() { return (double) hunger / MAX_HUNGER; }
+    public boolean isHighHunger() { return hunger >= HIGH_HUNGER_THRESHOLD; }
 
     public boolean isEating() { return eatTimer > 0 || eatingSeeds; }
     public boolean isDead() { return health <= 0; }
@@ -90,6 +120,7 @@ public class Goose extends Sprite {
             targetY = distractY;
         } else {
             eatingSeeds = false;
+            seedHungerReduced = false;
             targetX = student.centerX();
             targetY = student.centerY();
         }
@@ -120,6 +151,19 @@ public class Goose extends Sprite {
         } else {
             eatingSeeds = false;
             state = State.IDLE;
+        }
+
+        if (eatingSeeds) {
+            if (!seedHungerReduced) {
+                reduceHunger(SEED_HUNGER_REDUCTION);
+                seedHungerReduced = true;
+            }
+        } else {
+            hungerTimer += dt;
+            while (hungerTimer >= HUNGER_INCREASE_INTERVAL) {
+                hungerTimer -= HUNGER_INCREASE_INTERVAL;
+                increaseHunger(HUNGER_INCREASE_AMOUNT);
+            }
         }
 
         updateAnimation(state, dt);
@@ -154,8 +198,29 @@ public class Goose extends Sprite {
         super.draw(shapeRenderer);
     }
 
+    public void drawHungerBar(ShapeRenderer shapeRenderer, boolean colorBlindMode) {
+        if (shapeRenderer == null || isDead()) {
+            return;
+        }
+        float barWidth = 36f;
+        float barHeight = 5f;
+        float barX = (float) x - 2f;
+        float barY = (float) Math.min(472.0, y + height + 4.0);
+
+        shapeRenderer.setColor(0.1f, 0.1f, 0.1f, 0.85f);
+        shapeRenderer.rect(barX - 1f, barY - 1f, barWidth + 2f, barHeight + 2f);
+
+        if (isHighHunger()) {
+            shapeRenderer.setColor(colorBlindMode ? Color.MAGENTA : Color.RED);
+        } else {
+            shapeRenderer.setColor(colorBlindMode ? Color.CYAN : Color.ORANGE);
+        }
+        shapeRenderer.rect(barX, barY, barWidth * (float) getHungerPercent(), barHeight);
+    }
+
     public double getSpeed() {
-        return baseSpeed * speedMultiplier;
+        double hungerMultiplier = isHighHunger() ? HIGH_HUNGER_SPEED_MULTIPLIER : 1.0;
+        return baseSpeed * speedMultiplier * hungerMultiplier;
     }
 
     public void setSpeedMultiplier(double speedMultiplier) {

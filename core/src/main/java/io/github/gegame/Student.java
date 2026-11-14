@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import io.github.gegame.animation.AnimState;
 import io.github.gegame.animation.Direction;
 import io.github.gegame.animation.SpriteAnimator;
+import io.github.gegame.inventory.Bread;
 import io.github.gegame.inventory.DistractionItem;
 import io.github.gegame.inventory.FeedItem;
 import io.github.gegame.inventory.InitialInventory;
@@ -60,6 +61,9 @@ public class Student extends Player {
     public void useSelectedItem(Goose goose) {
         Item item = inventory.getSelected();
         if (item != null && !item.isUsedUp()) {
+            if (item instanceof Bread && ((Bread) item).isOnCooldown()) {
+                return;
+            }
             item.use(this, goose);
             if (item instanceof DistractionItem || item instanceof FeedItem) {
                 throwTimer = THROW_SECONDS; // thrown items get the throw pose; the umbrella doesn't
@@ -93,6 +97,17 @@ public class Student extends Player {
                 livingGeese.get(i).distract(gx, gy, distraction.getDuration());
             }
             distraction.consume();
+            throwTimer = THROW_SECONDS;
+        } else if (item instanceof Bread) {
+            Bread bread = (Bread) item;
+            if (bread.isOnCooldown()) {
+                return;
+            }
+            Goose target = findNearestLivingGoose(geese);
+            if (target != null) {
+                target.feed(bread.getFeedAmount());
+            }
+            bread.startCooldown();
             throwTimer = THROW_SECONDS;
         } else if (item instanceof FeedItem) {
             FeedItem feed = (FeedItem) item;
@@ -135,6 +150,14 @@ public class Student extends Player {
         }
         if (throwTimer > 0) {
             throwTimer = Math.max(0, throwTimer - dt);
+        }
+        if (inventory != null) {
+            for (int i = 0; i < inventory.getCapacity(); i++) {
+                Item slotItem = inventory.getItem(i);
+                if (slotItem instanceof Bread) {
+                    ((Bread) slotItem).updateCooldown(dt);
+                }
+            }
         }
 
         // Pick the animation: throw beats walk beats idle.

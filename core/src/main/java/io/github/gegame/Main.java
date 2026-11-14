@@ -4,6 +4,8 @@ import io.github.gegame.ClockTimer;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -67,6 +69,14 @@ public class Main extends Game {
     private String notificationMessage = "Welcome! WASD to move, 1-5 to select, SPACE to use items";
     private Timer.Task clearNotificationTask;
 
+    // Audio assets
+    private static final float MUSIC_VOLUME = 0.25f;
+    private static final float GOOSE_HONK_VOLUME = 0.25f;
+    private static final float DUCK_QUACK_VOLUME = 1.0f;
+    private Music backgroundMusic;
+    private Music gooseHonkMusic;
+    private Sound duckQuackSound;
+
     @Override
     public void create() {
         batch = new SpriteBatch();
@@ -77,7 +87,39 @@ public class Main extends Game {
         campusMap.create();
 
         resetGame();
+        initAudio();
         setScreen(new Intro_screen());
+    }
+
+    private void initAudio() {
+        if (Gdx.audio == null || Gdx.files == null) {
+            return;
+        }
+        try {
+            if (Gdx.files.internal("audio/music/Central Hall Rush.mp3").exists()) {
+                backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("audio/music/Central Hall Rush.mp3"));
+                backgroundMusic.setLooping(true);
+                backgroundMusic.setVolume(MUSIC_VOLUME);
+                backgroundMusic.play();
+            }
+            if (Gdx.files.internal("audio/sfx/goose_honk.mp3").exists()) {
+                gooseHonkMusic = Gdx.audio.newMusic(Gdx.files.internal("audio/sfx/goose_honk.mp3"));
+                gooseHonkMusic.setLooping(true);
+                gooseHonkMusic.setVolume(GOOSE_HONK_VOLUME);
+                gooseHonkMusic.play();
+            }
+            if (Gdx.files.internal("audio/sfx/duckquack.wav").exists()) {
+                duckQuackSound = Gdx.audio.newSound(Gdx.files.internal("audio/sfx/duckquack.wav"));
+            }
+        } catch (Exception e) {
+            Gdx.app.error("Audio", "Failed to load audio assets", e);
+        }
+    }
+
+    private void playDuckQuack() {
+        if (duckQuackSound != null) {
+            duckQuackSound.play(DUCK_QUACK_VOLUME);
+        }
     }
 
     /**
@@ -90,6 +132,27 @@ public class Main extends Game {
         if (campusMap != null) {
             campusMap.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         }
+        if (backgroundMusic != null) {
+            backgroundMusic.setVolume(MUSIC_VOLUME);
+            if (!backgroundMusic.isPlaying()) {
+                backgroundMusic.play();
+            }
+        }
+        if (gooseHonkMusic != null) {
+            gooseHonkMusic.setVolume(GOOSE_HONK_VOLUME);
+            if (!gooseHonkMusic.isPlaying()) {
+                gooseHonkMusic.play();
+            }
+        }
+    }
+
+    /**
+     * Resets the game state and returns to the intro screen.
+     */
+    public void returnToIntroScreen() {
+        resetGame();
+        Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        setScreen(new Intro_screen());
     }
 
     private void resetGame() {
@@ -296,6 +359,7 @@ public class Main extends Game {
                     scoreSystem.addEscapeBonus(countdownTimer.getRemaining());
                     scoreSystem.addTimeBonus(countdownTimer.getRemaining());
                     student.setScore(scoreSystem.getScore());
+                    playDuckQuack();
                     showNotification("ESCAPED! Reached Central Hall on time! (+" + scoreSystem.getScore() + " pts)");
                 } else if (!wasTouchingLockedCentralHall) {
                     int secondsLeft = CENTRAL_HALL_UNLOCK_SECONDS - elapsedSeconds;
@@ -307,8 +371,10 @@ public class Main extends Game {
             // Check defeat conditions
             if (student.isDead()) {
                 countdownTimer.setRunState(RunState.CAUGHT);
+                playDuckQuack();
             } else if (countdownTimer.isExpired()) {
                 countdownTimer.expire();
+                playDuckQuack();
             }
 
             // Update pickups (check if player contacts them)
@@ -376,6 +442,15 @@ public class Main extends Game {
         }
         student.draw(batch);
         batch.end();
+
+        // 1c. Draw hunger bar above each living goose
+        if (!countdownTimer.getRunState().isPaused()) {
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+            for (Goose g : geese) {
+                g.drawHungerBar(shapeRenderer, colorBlindMode);
+            }
+            shapeRenderer.end();
+        }
 
         // 2. Draw Inventory HUD
         inventoryUI.render(shapeRenderer, batch, font);
@@ -491,7 +566,7 @@ public class Main extends Game {
 
     private void handleInput(float dt) {
         if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
-            resetGame();
+            returnToIntroScreen();
             return;
         }
 
@@ -567,13 +642,20 @@ public class Main extends Game {
             if (!spamFilter.allowAction(gameTime)) return;
             Item selected = student.getInventory().getSelected();
             if (selected != null && !selected.isUsedUp()) {
+                if (selected instanceof Bread && ((Bread) selected).isOnCooldown()) {
+                    int secs = (int) Math.ceil(((Bread) selected).getCooldownRemaining());
+                    showNotification("Bread is recharging! " + secs + "s left!");
+                    return;
+                }
                 if (selected instanceof DistractionItem) {
                     showNotification("Threw Seeds! Goose is distracted for 5s!");
+                    playDuckQuack();
                 } else if (selected instanceof FeedItem) {
                     showNotification("Fed Goose Bread! Goose is eating for 2s!");
+                    playDuckQuack();
                 } else if (selected instanceof FoundItem) {
                     if (selected instanceof AllergyMedicationItem) {
-                        showNotification("Used Allergy Medication! Healed +50 HP!");
+                        showNotification("Used Medication! Healed +50 HP!");
                     } else {
                         showNotification("Used " + selected.getName() + "!");
                     }
@@ -658,5 +740,8 @@ public class Main extends Game {
 
         if (hiddenEventManager != null) hiddenEventManager.dispose();
         if (campusMap != null) campusMap.dispose();
+        if (backgroundMusic != null) backgroundMusic.dispose();
+        if (gooseHonkMusic != null) gooseHonkMusic.dispose();
+        if (duckQuackSound != null) duckQuackSound.dispose();
     }
 }

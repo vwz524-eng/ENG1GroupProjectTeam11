@@ -13,8 +13,8 @@ public class TreeEventOutcome extends EventOutcome {
 
     public TreeEventOutcome() {
         super(
-            "Reveals Allergy Medication (Heals 50 health)",
-            "You investigated the tree and found Allergy Medication! Use it to heal 50 HP.",
+            "Reveals Medication (Heals 50 health)",
+            "You investigated the tree and found Medication! Use it to heal 50 HP.",
             150
         );
         setRevealedItem(new AllergyMedicationItem());

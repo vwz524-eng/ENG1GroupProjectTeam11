@@ -62,8 +62,11 @@ public class Pause_screen extends Retry implements Screen {
 
     @Override
     public void Restart_game() {
-        if (Gdx.app != null && Gdx.app.getApplicationListener() instanceof Game) {
-            ((Game) Gdx.app.getApplicationListener()).setScreen(new MainGame());
+        if (Gdx.app != null && Gdx.app.getApplicationListener() instanceof Main) {
+            ((Main) Gdx.app.getApplicationListener()).returnToIntroScreen();
+            dispose();
+        } else if (Gdx.app != null && Gdx.app.getApplicationListener() instanceof Game) {
+            ((Game) Gdx.app.getApplicationListener()).setScreen(new Intro_screen());
             dispose();
         }
     }
