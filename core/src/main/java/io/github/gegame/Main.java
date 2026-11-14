@@ -1,6 +1,8 @@
 package io.github.gegame;
 
 import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -22,6 +24,19 @@ public class Main extends ApplicationAdapter {
         batch.begin();
         batch.draw(image, 140, 210);
         batch.end();
+        
+        //space -> Shoot
+        if (Gdx.input.isKeyPressed(Input.Keys.SPACE)){
+            player.shoot();
+        }
+        //WASD -> Move
+        player.move(
+				Gdx.input.isKeyPressed(Input.Keys.A),
+				Gdx.input.isKeyPressed(Input.Keys.D),
+				Gdx.input.isKeyPressed(Input.Keys.S),
+				Gdx.input.isKeyPressed(Input.Keys.W), 
+				Gdx.graphics.getDeltaTime());
+				
     }
 
     @Override
