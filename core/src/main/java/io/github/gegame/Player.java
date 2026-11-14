@@ -119,6 +119,20 @@ public class Player extends Sprite {
         }
     }
 
+    /**
+     * Fully restores the player's health to maximum.
+     */
+    public void restoreHealth() {
+        this.health = this.maxHealth;
+    }
+
+    /**
+     * Restores the specified amount of health.
+     */
+    public void restoreHealth(int amount) {
+        heal(amount);
+    }
+
     public void takeDamage(int amount) {
         if (amount > 0) {
             this.health = Math.max(0, health - amount);

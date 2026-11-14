@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.Timer;
 import io.github.gegame.escape.*;
+import io.github.gegame.hiddenevent.*;
 import io.github.gegame.inventory.*;
 
 import java.util.ArrayList;
@@ -31,6 +32,9 @@ public class Main extends ApplicationAdapter {
     // Timed Escape system components
     private CountdownTimer countdownTimer;
     private EscapeObjective escapeObjective;
+
+    // Hidden Event Discovery system
+    private HiddenEventManager hiddenEventManager;
 
     private int score = 0;
     private String notificationMessage = "Welcome! WASD to move, 1-5 to select, SPACE to use items";
@@ -62,6 +66,25 @@ public class Main extends ApplicationAdapter {
         pickups.add(new ItemPickup(new FoundItem("umbrella", "Umbrella", "Gives 10s of goose protection"), 300, 380));
 
         inventoryUI = new InventoryUI(student.getInventory());
+
+        // Initialize Hidden Event Discovery
+        hiddenEventManager = new HiddenEventManager();
+        hiddenEventManager.registerEvent(new LongBoiStatueEvent(260, 330));
+        hiddenEventManager.registerEvent(new TreeAllergyMedEvent(470, 150));
+
+        hiddenEventManager.addListener(new DiscoveryListener() {
+            @Override
+            public void onEventDiscovered(HiddenEvent event) {
+                showNotification("Discovered: " + event.getInteractionPrompt() + " (Press E)");
+            }
+
+            @Override
+            public void onEventActivated(HiddenEvent event, EventOutcome outcome) {
+                if (outcome != null) {
+                    showNotification(outcome.getMessage());
+                }
+            }
+        });
 
         // Demonstrate Observer pattern: Score listens to inventory events
         student.getInventory().addListener(new InventoryListener() {
@@ -107,6 +130,7 @@ public class Main extends ApplicationAdapter {
         handleInput(dt);
 
         boolean isGameRunning = countdownTimer.getRunState().isRunning() && !student.isDead() && !escapeObjective.isCompleted();
+        HiddenEvent nearbyEvent = isGameRunning ? hiddenEventManager.checkProximity(student) : null;
 
         if (isGameRunning) {
             // Tick escape countdown timer
@@ -147,6 +171,9 @@ public class Main extends ApplicationAdapter {
         // Draw Central Hall goal zone on the right
         shapeRenderer.setColor(0.15f, 0.4f, 0.2f, 0.5f);
         shapeRenderer.rect(580, 0, 60, 480);
+
+        // Draw Hidden Events (Statue & Tree)
+        hiddenEventManager.draw(shapeRenderer);
 
         // Draw pickups
         for (ItemPickup pickup : pickups) {
@@ -193,6 +220,7 @@ public class Main extends ApplicationAdapter {
             font.setColor(Color.GREEN);
         }
         font.draw(batch, "Time: " + countdownTimer.getFormattedTime() + " [" + level + "]", 240, 475);
+        font.draw(batch, "Secrets: " + hiddenEventManager.getEventsInteracted() + "/2", 400, 475);
 
         // Goal indicator
         font.setColor(Color.LIME);
@@ -211,6 +239,12 @@ public class Main extends ApplicationAdapter {
             font.draw(batch, "Goose Eating!", 500, 430);
         }
 
+        // Hidden event interaction prompt
+        if (nearbyEvent != null && !nearbyEvent.isCompleted()) {
+            font.setColor(Color.GOLD);
+            font.draw(batch, "[E] " + nearbyEvent.getInteractionPrompt(), (float) nearbyEvent.getX() - 30, (float) nearbyEvent.getY() + 45);
+        }
+
         // Notification banner
         if (notificationMessage != null) {
             font.setColor(Color.GOLD);
@@ -218,7 +252,7 @@ public class Main extends ApplicationAdapter {
         }
 
         font.setColor(Color.LIGHT_GRAY);
-        font.draw(batch, "WASD: Move | 1-5: Slot | SPACE: Use | P: Pause | R: Restart", 20, 415);
+        font.draw(batch, "WASD: Move | 1-5: Slot | SPACE: Use | E: Interact | P: Pause | R: Restart", 20, 415);
 
         // Terminal State Messages
         if (escapeObjective.isCompleted()) {
@@ -281,8 +315,20 @@ public class Main extends ApplicationAdapter {
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_4)) student.getInventory().setSelectedIndex(3);
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_5)) student.getInventory().setSelectedIndex(4);
 
-        // Use selected item
-        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) || Gdx.input.isKeyJustPressed(Input.Keys.E)) {
+        // Interact with nearby Hidden Event (E key)
+        if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
+            HiddenEvent nearby = hiddenEventManager.checkProximity(student);
+            if (nearby != null && nearby.canActivate()) {
+                EventOutcome outcome = hiddenEventManager.interact(student);
+                if (outcome != null) {
+                    showNotification(outcome.getMessage());
+                }
+                return;
+            }
+        }
+
+        // Use selected item (SPACE key)
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
             Item selected = student.getInventory().getSelected();
             if (selected != null) {
                 if (selected instanceof DistractionItem) {
