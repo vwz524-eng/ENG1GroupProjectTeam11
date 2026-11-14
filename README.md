@@ -18,23 +18,18 @@ Base install is libGDX with extentions:
 ### Setup
 
 - Use the command: git clone https://github.com/vwz524-eng/ENG1GroupProjectTeam11.git your://directory or use git GUI
-- [Follow the libGDX setup guide](https://libgdx.com/wiki/start/import-and-running#importing-the-project), which reads as follows:
-```
+- [Follow the importing and running a project section of the libGDX setup guide](https://libgdx.com/wiki/start/import-and-running#importing-the-project), which reads as:
+
 If you have just generated the project in gdx-liftoff, you may click the option “Open in IntelliJ Idea” to get started right away. Otherwise, continue with the following steps:
 
-    In IntelliJ IDEA or Android Studio, you can choose to open the build.gradle file and select “Open as Project” to get started.
-
+- In IntelliJ IDEA or Android Studio, you can choose to open the build.gradle file and select “Open as Project” to get started.
     In Eclipse, choose File -> Import... -> Gradle -> Existing Gradle Project (make sure that your freshly generated project is not located inside of your workspace AND you don’t have another project in your workspace with the same name).
 
-    In NetBeans it is File -> Open Project.
-
+- In NetBeans it is File -> Open Project.
     You may need to refresh the Gradle project after the initial import if some dependencies weren’t downloaded yet.
 
-    In IntelliJ IDEA/Android Studio, the Reimport all Gradle projects button is a pair of circling arrows at the top left in the Gradle tool window, which can be opened with View -> Tool Windows -> Gradle.
-
+  In IntelliJ IDEA/Android Studio, the Reimport all Gradle projects button is a pair of circling arrows at the top left in the Gradle tool window, which can be opened with View -> Tool Windows -> Gradle.
     In Eclipse right-click on your project Gradle -> Refresh Gradle Project.
-
-```
 
 ## Project Plan
 
