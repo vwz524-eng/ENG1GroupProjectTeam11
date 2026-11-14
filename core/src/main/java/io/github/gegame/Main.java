@@ -1,5 +1,6 @@
 package io.github.gegame;
 
+import io.github.gegame.ClockTimer;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -28,6 +29,7 @@ public class Main extends Game {
     private ShapeRenderer shapeRenderer;
     private BitmapFont font;
     private CampusMap campusMap;
+    private ClockTimer clockTimer;
 
     private Student student;
     private final List<Goose> geese = new ArrayList<>();
@@ -70,6 +72,7 @@ public class Main extends Game {
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
         font = new BitmapFont();
+        clockTimer = new ClockTimer(250, 418, 0.3f);
         campusMap = new CampusMap();
         campusMap.create();
 
@@ -396,7 +399,8 @@ public class Main extends Game {
                 font.setColor(Color.GREEN);
             }
         }
-        font.draw(batch, "Time: " + countdownTimer.getFormattedTime() + " [" + level + "]", 240, 475);
+        clockTimer.drawTime(batch, countdownTimer.getRemaining(),
+            countdownTimer.getRunState().isRunning());
         font.draw(batch, "Secrets: " + hiddenEventManager.getEventsInteracted() + "/2", 400, 475);
 
         // Goal indicator
@@ -437,7 +441,7 @@ public class Main extends Game {
         // Notification banner
         if (notificationMessage != null) {
             font.setColor(Color.GOLD);
-            font.draw(batch, notificationMessage, 140, 435);
+            font.draw(batch, notificationMessage, 140, 395);
         }
 
         font.setColor(Color.LIGHT_GRAY);
@@ -647,9 +651,11 @@ public class Main extends Game {
         if (shapeRenderer != null) shapeRenderer.dispose();
         if (font != null) font.dispose();
         if (student != null) student.dispose();
+        if (clockTimer != null) clockTimer.dispose();
         for (Goose g : geese) {
             g.dispose();
         }
+
         if (hiddenEventManager != null) hiddenEventManager.dispose();
         if (campusMap != null) campusMap.dispose();
     }
