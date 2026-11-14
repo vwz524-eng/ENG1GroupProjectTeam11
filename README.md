@@ -31,7 +31,8 @@ Base install is libGDX with extentions:
 > In IntelliJ IDEA/Android Studio, the Reimport all Gradle projects button is a pair of circling arrows at the top left in the Gradle tool window, which can be opened with View -> Tool Windows -> Gradle.
 >   In Eclipse right-click on your project Gradle -> Refresh Gradle Project.
 >
-> from https://libgdx.com/wiki/start/import-and-running#importing-the-project
+> 
+> Sourced from https://libgdx.com/wiki/start/import-and-running#importing-the-project
 
 ## Project Plan
 
