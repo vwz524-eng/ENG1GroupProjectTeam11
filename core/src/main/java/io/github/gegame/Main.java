@@ -9,13 +9,14 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.Timer;
+import io.github.gegame.escape.*;
 import io.github.gegame.inventory.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Main game loop demonstrating the Student, Goose, ItemPickups, and Inventory System.
+ * Main game loop demonstrating Student, Goose, ItemPickups, Inventory, and Timed Escape.
  */
 public class Main extends ApplicationAdapter {
     private SpriteBatch batch;
@@ -26,6 +27,10 @@ public class Main extends ApplicationAdapter {
     private Goose goose;
     private final List<ItemPickup> pickups = new ArrayList<>();
     private InventoryUI inventoryUI;
+
+    // Timed Escape system components
+    private CountdownTimer countdownTimer;
+    private EscapeObjective escapeObjective;
 
     private int score = 0;
     private String notificationMessage = "Welcome! WASD to move, 1-5 to select, SPACE to use items";
@@ -44,6 +49,11 @@ public class Main extends ApplicationAdapter {
         student = new Student(100, 240);
         goose = new Goose(500, 240);
         score = 0;
+
+        // Initialize 5-minute timed escape countdown
+        countdownTimer = new CountdownTimer(300);
+        countdownTimer.start();
+        escapeObjective = new EscapeObjective(true);
 
         pickups.clear();
         // Populate world with pickups for demonstration
@@ -75,7 +85,7 @@ public class Main extends ApplicationAdapter {
             }
         });
 
-        showNotification("Survive the Goose! Collect items and use distractions.");
+        showNotification("Escape to Central Hall before the 5-minute timer expires!");
     }
 
     public void showNotification(String message) {
@@ -96,11 +106,31 @@ public class Main extends ApplicationAdapter {
         float dt = Gdx.graphics.getDeltaTime();
         handleInput(dt);
 
-        if (!student.isDead()) {
+        boolean isGameRunning = countdownTimer.getRunState().isRunning() && !student.isDead() && !escapeObjective.isCompleted();
+
+        if (isGameRunning) {
+            // Tick escape countdown timer
+            countdownTimer.tick(dt);
+
             // Update entities
             student.update(dt);
             goose.update(dt, student);
             student.checkGooseCollision(goose);
+
+            // Check if player reaches Central Hall (right exit zone)
+            if (student.getX() >= 580) {
+                escapeObjective.complete();
+                countdownTimer.setRunState(RunState.ESCAPED);
+                score += 500; // Bonus for escaping
+                showNotification("ESCAPED! You reached Central Hall on time! (+500 pts)");
+            }
+
+            // Check defeat conditions
+            if (student.isDead()) {
+                countdownTimer.setRunState(RunState.CAUGHT);
+            } else if (countdownTimer.isExpired()) {
+                countdownTimer.expire();
+            }
 
             // Update pickups (check if player contacts them)
             for (ItemPickup pickup : pickups) {
@@ -113,6 +143,10 @@ public class Main extends ApplicationAdapter {
 
         // 1. Draw entities using ShapeRenderer
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+
+        // Draw Central Hall goal zone on the right
+        shapeRenderer.setColor(0.15f, 0.4f, 0.2f, 0.5f);
+        shapeRenderer.rect(580, 0, 60, 480);
 
         // Draw pickups
         for (ItemPickup pickup : pickups) {
@@ -143,15 +177,30 @@ public class Main extends ApplicationAdapter {
         // 2. Draw Inventory HUD
         inventoryUI.render(shapeRenderer, batch, font);
 
-        // 3. Draw HUD Text (Controls, Score, Status)
+        // 3. Draw HUD Text (Controls, Score, Timer, Status)
         batch.begin();
         font.setColor(Color.WHITE);
         font.draw(batch, "Score: " + score, 540, 460);
         font.draw(batch, "Health: " + student.getHealth() + "/" + student.getMaxHealth(), 20, 475);
 
+        // Draw Timer with WarningLevel coloring
+        WarningLevel level = countdownTimer.getWarningLevel();
+        if (level == WarningLevel.CRITICAL) {
+            font.setColor(Color.RED);
+        } else if (level == WarningLevel.WARNING) {
+            font.setColor(Color.YELLOW);
+        } else {
+            font.setColor(Color.GREEN);
+        }
+        font.draw(batch, "Time: " + countdownTimer.getFormattedTime() + " [" + level + "]", 240, 475);
+
+        // Goal indicator
+        font.setColor(Color.LIME);
+        font.draw(batch, "CENTRAL HALL ->", 500, 240);
+
         if (student.hasUmbrella()) {
             font.setColor(Color.CYAN);
-            font.draw(batch, "Umbrella Active: " + String.format("%.1fs", student.getUmbrellaTimeLeft()), 200, 460);
+            font.draw(batch, "Umbrella: " + String.format("%.1fs", student.getUmbrellaTimeLeft()), 20, 400);
         }
 
         if (goose.isDistracted()) {
@@ -165,15 +214,25 @@ public class Main extends ApplicationAdapter {
         // Notification banner
         if (notificationMessage != null) {
             font.setColor(Color.GOLD);
-            font.draw(batch, notificationMessage, 150, 435);
+            font.draw(batch, notificationMessage, 140, 435);
         }
 
         font.setColor(Color.LIGHT_GRAY);
-        font.draw(batch, "WASD: Move | 1-5: Select Slot | SPACE: Use Item", 20, 415);
+        font.draw(batch, "WASD: Move | 1-5: Slot | SPACE: Use | P: Pause | R: Restart", 20, 415);
 
-        if (student.isDead()) {
+        // Terminal State Messages
+        if (escapeObjective.isCompleted()) {
+            font.setColor(Color.GREEN);
+            font.draw(batch, "ESCAPED! You reached Central Hall in time! Press 'R' to play again.", 100, 260);
+        } else if (countdownTimer.isExpired()) {
             font.setColor(Color.RED);
-            font.draw(batch, "GAME OVER! The goose caught you. Press 'R' to restart.", 140, 260);
+            font.draw(batch, "TIME EXPIRED! You missed your lecture. Press 'R' to restart.", 110, 260);
+        } else if (student.isDead()) {
+            font.setColor(Color.RED);
+            font.draw(batch, "CAUGHT! The geese defeated you. Press 'R' to restart.", 140, 260);
+        } else if (countdownTimer.getRunState().isPaused()) {
+            font.setColor(Color.YELLOW);
+            font.draw(batch, "GAME PAUSED - Press 'P' to resume", 200, 260);
         }
 
         batch.end();
@@ -185,7 +244,17 @@ public class Main extends ApplicationAdapter {
             return;
         }
 
-        if (student.isDead()) return;
+        if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
+            if (countdownTimer.getRunState().isRunning()) {
+                countdownTimer.pause();
+            } else if (countdownTimer.getRunState().isPaused()) {
+                countdownTimer.start();
+            }
+        }
+
+        if (!countdownTimer.getRunState().isRunning() || student.isDead() || escapeObjective.isCompleted()) {
+            return;
+        }
 
         if (Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             student.moveLeft(dt);
