@@ -1,6 +1,9 @@
 package io.github.gegame.hiddenevent;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import io.github.gegame.Player;
 import java.util.ArrayList;
@@ -15,6 +18,10 @@ public class HiddenEventManager {
     private final List<HiddenEvent> events = new ArrayList<>();
     private final List<DiscoveryListener> listeners = new ArrayList<>();
     private int eventsInteracted = 0;
+
+    private Texture statueTexture;
+    private Texture treeTexture;
+    private boolean texturesLoaded = false;
 
     public HiddenEventManager() {
     }
@@ -111,29 +118,67 @@ public class HiddenEventManager {
         }
     }
 
+    private void ensureTexturesLoaded() {
+        if (texturesLoaded) return;
+        texturesLoaded = true;
+        if (Gdx.files != null) {
+            if (Gdx.files.internal("maps/longboi_statue.png").exists()) {
+                statueTexture = new Texture(Gdx.files.internal("maps/longboi_statue.png"));
+            }
+            if (Gdx.files.internal("maps/tree.png").exists()) {
+                treeTexture = new Texture(Gdx.files.internal("maps/tree.png"));
+            }
+        }
+    }
+
     /**
-     * Renders visual indicators for hidden event locations in the world.
+     * Renders hidden event sprites (Long Boi statue and tree) using asset textures.
+     *
+     * @param batch the SpriteBatch to draw with
+     */
+    public void draw(SpriteBatch batch) {
+        if (batch == null) return;
+        ensureTexturesLoaded();
+
+        for (HiddenEvent event : events) {
+            float ex = (float) event.getX();
+            float ey = (float) event.getY();
+
+            if ("STATUE".equalsIgnoreCase(event.getEventType()) && statueTexture != null) {
+                float w = statueTexture.getWidth() * 0.5f;
+                float h = statueTexture.getHeight() * 0.625f;
+                batch.draw(statueTexture, ex - w / 2f, ey - h / 2f, w, h);
+            } else if ("TREE".equalsIgnoreCase(event.getEventType()) && treeTexture != null) {
+                float w = treeTexture.getWidth() * 0.5f;
+                float h = treeTexture.getHeight() * 0.625f;
+                batch.draw(treeTexture, ex - w / 2f, ey - h / 2f, w, h);
+            }
+        }
+    }
+
+    /**
+     * Fallback renderer when asset textures are unavailable.
      *
      * @param shapeRenderer the ShapeRenderer to draw with
      */
     public void draw(ShapeRenderer shapeRenderer) {
         if (shapeRenderer == null) return;
+        ensureTexturesLoaded();
 
         for (HiddenEvent event : events) {
-            if (event.isCompleted()) {
-                continue;
-            }
             float ex = (float) event.getX();
             float ey = (float) event.getY();
 
             if ("STATUE".equalsIgnoreCase(event.getEventType())) {
-                // Long Boi Statue: Gold / Bronze pedestal
+                if (statueTexture != null) continue;
+                // Long Boi Statue fallback
                 shapeRenderer.setColor(0.85f, 0.70f, 0.20f, 0.85f);
                 shapeRenderer.rect(ex - 16, ey - 20, 32, 40);
                 shapeRenderer.setColor(1.0f, 0.9f, 0.4f, 1.0f);
                 shapeRenderer.circle(ex, ey + 24, 12);
             } else if ("TREE".equalsIgnoreCase(event.getEventType())) {
-                // Tree outside Central Hall: Brown trunk + green foliage
+                if (treeTexture != null) continue;
+                // Tree fallback
                 shapeRenderer.setColor(0.45f, 0.25f, 0.10f, 1.0f);
                 shapeRenderer.rect(ex - 8, ey - 20, 16, 26);
                 shapeRenderer.setColor(0.15f, 0.65f, 0.25f, 0.85f);
@@ -143,13 +188,19 @@ public class HiddenEventManager {
                 shapeRenderer.setColor(Color.MAGENTA);
                 shapeRenderer.circle(ex, ey, 14);
             }
-
-            // If discovered, draw interactive sparkle aura
-            if (event.isDiscovered()) {
-                shapeRenderer.setColor(1f, 1f, 0.3f, 0.35f);
-                shapeRenderer.circle(ex, ey, (float) event.getTriggerRadius());
-            }
         }
+    }
+
+    public void dispose() {
+        if (statueTexture != null) {
+            statueTexture.dispose();
+            statueTexture = null;
+        }
+        if (treeTexture != null) {
+            treeTexture.dispose();
+            treeTexture = null;
+        }
+        texturesLoaded = false;
     }
 
     public List<HiddenEvent> getEvents() {

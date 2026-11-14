@@ -31,7 +31,7 @@ public class MainMenu implements Screen {
 
     public MainMenu() {
         this.title = "A Day in the Life - Main Menu";
-        this.options = new ArrayList<>(Arrays.asList("Start Game", "Colourblind Mode", "Exit"));
+        this.options = new ArrayList<>(Arrays.asList("Start Game", "Exit"));
         this.selectedoption = 0;
         this.colourBlindOption = new Colour_blind_option();
 
@@ -43,7 +43,6 @@ public class MainMenu implements Screen {
     public void start_game() {
         if (Gdx.app != null && Gdx.app.getApplicationListener() instanceof Main) {
             Main main = (Main) Gdx.app.getApplicationListener();
-            main.setColorBlindMode(colourBlindOption.isCbmEnabled());
             main.startGameplay();
             dispose();
         } else if (Gdx.app != null && Gdx.app.getApplicationListener() instanceof Game) {
@@ -89,7 +88,6 @@ public class MainMenu implements Screen {
 
         font.setColor(Color.LIGHT_GRAY);
         font.draw(batch, "Use UP/DOWN arrows to navigate, ENTER to select", 230, 100);
-        font.draw(batch, "Colourblind Mode: " + (colourBlindOption.isCbmEnabled() ? "ENABLED" : "DISABLED"), 280, 60);
         batch.end();
 
         handleInput();
@@ -111,16 +109,6 @@ public class MainMenu implements Screen {
                 start_game();
                 break;
             case 1:
-                if (colourBlindOption.isCbmEnabled()) {
-                    colourBlindOption.disable_cbm();
-                } else {
-                    colourBlindOption.enable_cbm();
-                }
-                if (Gdx.app != null && Gdx.app.getApplicationListener() instanceof Main) {
-                    ((Main) Gdx.app.getApplicationListener()).setColorBlindMode(colourBlindOption.isCbmEnabled());
-                }
-                break;
-            case 2:
                 Gdx.app.exit();
                 break;
         }

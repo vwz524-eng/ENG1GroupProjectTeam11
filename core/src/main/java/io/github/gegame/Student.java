@@ -126,6 +126,9 @@ public class Student extends Player {
     }
 
     public void checkGooseCollision(Goose goose) {
+        if (goose == null || goose.isEating() || goose.isDead()) {
+            return;
+        }
         if (collidesWith(goose)) {
             takeDamage(GOOSE_DAMAGE);
         }

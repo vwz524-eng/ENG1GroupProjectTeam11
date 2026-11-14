@@ -36,6 +36,7 @@ public class Goose extends Sprite {
 
     private double distractTimer = 0;
     private double distractX, distractY;
+    private boolean eatingSeeds = false;
 
     private double eatTimer = 0; // stops to eat after being fed bread
 
@@ -56,6 +57,7 @@ public class Goose extends Sprite {
         distractX = targetX;
         distractY = targetY;
         distractTimer = seconds;
+        eatingSeeds = false;
     }
 
     public void feed(int damage) {
@@ -63,45 +65,61 @@ public class Goose extends Sprite {
         eatTimer = 2.0;
     }
 
-    public boolean isEating() { return eatTimer > 0; }
+    public boolean isEating() { return eatTimer > 0 || eatingSeeds; }
     public boolean isDead() { return health <= 0; }
     public boolean isDistracted() { return distractTimer > 0; }
 
     public void update(double dt, Student student) {
         if (isDead()) {
+            eatingSeeds = false;
             updateAnimation(State.IDLE, dt);
             return;
         }
 
         if (eatTimer > 0) {
-            eatTimer -= dt;
-            updateAnimation(State.IDLE, dt); // stopped, keeps facing the way it was going
+            eatTimer = Math.max(0, eatTimer - dt);
+            eatingSeeds = false;
+            updateAnimation(State.DISTRACTED, dt); // eating animation only while stationary
             return;
         }
 
         double targetX, targetY;
-        State state;
         if (distractTimer > 0) {
-            distractTimer -= dt;
+            distractTimer = Math.max(0, distractTimer - dt);
             targetX = distractX;
             targetY = distractY;
-            state = State.DISTRACTED;
         } else {
+            eatingSeeds = false;
             targetX = student.centerX();
             targetY = student.centerY();
-            state = State.CHASE;
         }
 
         double dx = targetX - centerX();
         double dy = targetY - centerY();
         double dist = Math.hypot(dx, dy);
 
-        if (dist > 1) {
+        State state;
+        if (dist > 1.0) {
             double speed = getSpeed();
-            x += (dx / dist) * speed * dt;
-            y += (dy / dist) * speed * dt;
-
+            double step = Math.min(speed * dt, dist);
+            x += (dx / dist) * step;
+            y += (dy / dist) * step;
             facing = Direction.fromVector(dx, dy, facing);
+
+            double remainingDist = dist - step;
+            if (distractTimer > 0 && remainingDist <= 1.0) {
+                eatingSeeds = true;
+                state = State.DISTRACTED;
+            } else {
+                eatingSeeds = false;
+                state = distractTimer > 0 ? State.WALK : State.CHASE;
+            }
+        } else if (distractTimer > 0) {
+            eatingSeeds = true;
+            state = State.DISTRACTED; // arrived at seeds: stationary eating animation
+        } else {
+            eatingSeeds = false;
+            state = State.IDLE;
         }
 
         updateAnimation(state, dt);

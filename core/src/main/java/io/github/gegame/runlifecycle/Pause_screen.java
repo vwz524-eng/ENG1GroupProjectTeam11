@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import io.github.gegame.Main;
 
 /**
  * Pause screen as defined in the Game Class Diagram.
@@ -91,12 +92,21 @@ public class Pause_screen extends Retry implements Screen {
         font.setColor(Color.WHITE);
         font.draw(batch, "Location: " + street + ", " + city, 300, 300);
 
+        boolean colorBlind = Gdx.app != null
+            && Gdx.app.getApplicationListener() instanceof Main
+            && ((Main) Gdx.app.getApplicationListener()).isColorBlindMode();
+        font.draw(batch, "[C] Colourblind Mode: " + (colorBlind ? "ON (High Contrast)" : "OFF"), 245, 260);
+
         font.setColor(Color.LIGHT_GRAY);
-        font.draw(batch, "[P / ESC] Resume Game | [R] Restart Game | [M] Main Menu", 200, 220);
+        font.draw(batch, "[P / ESC] Resume Game | [C] Colourblind | [R] Restart Game | [M] Main Menu", 150, 220);
         batch.end();
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.P) || Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             Resume_Game();
+        } else if (Gdx.input.isKeyJustPressed(Input.Keys.C)) {
+            if (Gdx.app != null && Gdx.app.getApplicationListener() instanceof Main) {
+                ((Main) Gdx.app.getApplicationListener()).toggleColorBlindMode();
+            }
         } else if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
             Restart_Game();
         } else if (Gdx.input.isKeyJustPressed(Input.Keys.M)) {

@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.Timer;
 import io.github.gegame.escape.*;
@@ -42,6 +43,7 @@ public class Main extends Game {
 
     // Score & Difficulty system
     private ScoreSystem scoreSystem;
+    private DifficultyLevel selectedDifficulty = DifficultyLevel.NORMAL;
 
     // Accessibility & Quality Requirements
     private boolean colorBlindMode = false;
@@ -49,6 +51,14 @@ public class Main extends Game {
     // Extreme activity / spam protection (Risk Assessment R21)
     private final ActionSpamFilter spamFilter = new ActionSpamFilter(0.12);
     private double gameTime = 0.0;
+
+    // Map coordinate conversion (Main renders in 640x480 inside CampusMap's 1280x768 world)
+    private static final float WORLD_SCALE_X = 1280f / 640f;
+    private static final float WORLD_SCALE_Y = 768f / 480f;
+    private static final float STUDENT_HITBOX_OFFSET_X = 20f;
+    private static final float STUDENT_HITBOX_OFFSET_Y = 6f;
+    private static final float STUDENT_HITBOX_WIDTH = 24f;
+    private static final float STUDENT_HITBOX_HEIGHT = 20f;
 
     private String notificationMessage = "Welcome! WASD to move, 1-5 to select, SPACE to use items";
     private Timer.Task clearNotificationTask;
@@ -81,10 +91,12 @@ public class Main extends Game {
         // Free the old entities' textures so restarting (R) doesn't leak GPU memory
         if (student != null) student.dispose();
         if (goose != null) goose.dispose();
+        if (hiddenEventManager != null) hiddenEventManager.dispose();
 
         student = new Student(100, 240);
         goose = new Goose(500, 240);
-        scoreSystem = new ScoreSystem(DifficultyLevel.NORMAL);
+        scoreSystem = new ScoreSystem(selectedDifficulty);
+        goose.setSpeedMultiplier(selectedDifficulty.getGooseSpeedModifier().getMultiplier());
         student.setScore(0);
 
         // Initialize 5-minute timed escape countdown
@@ -93,17 +105,15 @@ public class Main extends Game {
         escapeObjective = new EscapeObjective(true);
 
         pickups.clear();
-        // Populate world with pickups for demonstration
-        pickups.add(new ItemPickup(new Bread(), 250, 180));
-        pickups.add(new ItemPickup(new SeedBag(), 400, 320));
-        pickups.add(new ItemPickup(new FoundItem("umbrella", "Umbrella", "Gives 10s of goose protection"), 300, 380));
+        // SeedBag and Bread are in the starting inventory (InitialInventory);
+        // Umbrella is only obtained from the Long Boi hidden event.
 
         inventoryUI = new InventoryUI(student.getInventory());
 
-        // Initialize Hidden Event Discovery
+        // Initialize Hidden Event Discovery aligned with campus.tmx Long Boi & Tree
         hiddenEventManager = new HiddenEventManager();
-        hiddenEventManager.registerEvent(new LongBoiStatueEvent(260, 330));
-        hiddenEventManager.registerEvent(new TreeAllergyMedEvent(470, 150));
+        hiddenEventManager.registerEvent(new LongBoiStatueEvent(240, 360));
+        hiddenEventManager.registerEvent(new TreeAllergyMedEvent(408, 130));
 
         hiddenEventManager.addListener(new DiscoveryListener() {
             @Override
@@ -186,8 +196,12 @@ public class Main extends Game {
             goose.update(dt, student);
             student.checkGooseCollision(goose);
 
-            // Check if player reaches Central Hall (right exit zone)
-            if (student.getX() >= 580) {
+            // Check if player reaches Central Hall entrance or right exit zone
+            double studentCenterX = student.getX() + student.getWidth() / 2.0;
+            double studentCenterY = student.getY() + student.getHeight() / 2.0;
+            boolean reachedCentralHall = student.getX() >= 580
+                || (studentCenterX >= 500 && studentCenterY >= 200 && studentCenterY <= 300);
+            if (reachedCentralHall) {
                 escapeObjective.complete();
                 countdownTimer.setRunState(RunState.ESCAPED);
                 scoreSystem.addEscapeBonus(countdownTimer.getRemaining());
@@ -219,11 +233,7 @@ public class Main extends Game {
         // 1. Draw entities using ShapeRenderer
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
-        // Draw Central Hall goal zone on the right
-        shapeRenderer.setColor(0.15f, 0.4f, 0.2f, 0.5f);
-        shapeRenderer.rect(580, 0, 60, 480);
-
-        // Draw Hidden Events (Statue & Tree)
+        // Draw Hidden Events fallback (only used if textures couldn't be loaded)
         hiddenEventManager.draw(shapeRenderer);
 
         // Draw pickups
@@ -262,8 +272,9 @@ public class Main extends Game {
 
         shapeRenderer.end();
 
-        // 1b. Draw animated sprites (goose first so the student renders on top)
+        // 1b. Draw world textures and animated sprites (goose first so the student renders on top)
         batch.begin();
+        hiddenEventManager.draw(batch);
         goose.draw(batch);
         student.draw(batch);
         batch.end();
@@ -323,7 +334,7 @@ public class Main extends Game {
         }
 
         font.setColor(Color.LIGHT_GRAY);
-        font.draw(batch, "WASD: Move | 1-5: Slot | SPACE: Use | E: Interact | TAB: Diff | C: Colorblind | P: Pause | R: Reset", 10, 415);
+        font.draw(batch, "WASD: Move | 1-5: Slot | SPACE: Use | E: Interact | P: Pause | R: Reset", 10, 415);
 
         // Terminal State Messages & Pause Menu
         if (escapeObjective.isCompleted()) {
@@ -341,7 +352,7 @@ public class Main extends Game {
             font.setColor(Color.WHITE);
             font.draw(batch, "[P] Resume Game", 200, 325);
             font.draw(batch, "[R] Restart Game", 200, 295);
-            font.draw(batch, "[TAB] Difficulty: " + scoreSystem.getDifficulty().getName() + " (" + scoreSystem.getDifficulty().getBaseMultiplier() + "x)", 200, 265);
+            font.draw(batch, "Difficulty: " + scoreSystem.getDifficulty().getName() + " (" + scoreSystem.getDifficulty().getBaseMultiplier() + "x)", 200, 265);
             font.draw(batch, "[C] Colourblind Mode: " + (colorBlindMode ? "ON (High Contrast)" : "OFF"), 200, 235);
             font.setColor(Color.CYAN);
             font.draw(batch, "Accessibility: Subtitles & Text Cues Active", 175, 195);
@@ -354,19 +365,27 @@ public class Main extends Game {
         batch.end();
     }
 
+    private boolean canStudentMoveTo(double batchX, double batchY) {
+        if (campusMap == null) {
+            return true;
+        }
+        Rectangle worldBounds = new Rectangle(
+            (float) ((batchX + STUDENT_HITBOX_OFFSET_X) * WORLD_SCALE_X),
+            (float) ((batchY + STUDENT_HITBOX_OFFSET_Y) * WORLD_SCALE_Y),
+            STUDENT_HITBOX_WIDTH * WORLD_SCALE_X,
+            STUDENT_HITBOX_HEIGHT * WORLD_SCALE_Y
+        );
+        return campusMap.canMoveTo(worldBounds);
+    }
+
     private void handleInput(float dt) {
         if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
             resetGame();
             return;
         }
 
-        // Difficulty toggle key (TAB cycles Easy -> Normal -> Hard)
-        if (Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
-            cycleDifficulty();
-        }
-
-        // Toggle Colourblind mode (C key)
-        if (Gdx.input.isKeyJustPressed(Input.Keys.C)) {
+        // Colourblind mode can only be toggled while paused
+        if (Gdx.input.isKeyJustPressed(Input.Keys.C) && countdownTimer.getRunState().isPaused()) {
             toggleColorBlindMode();
         }
 
@@ -382,23 +401,35 @@ public class Main extends Game {
             return;
         }
 
+        double prevX = student.getX();
+        double prevY = student.getY();
+
         if (Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             student.moveLeft(dt);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.D) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
             student.moveRight(dt);
         }
+        double clampedX = Math.max(0, Math.min(640 - student.getWidth(), student.getX()));
+        if (canStudentMoveTo(clampedX, prevY)) {
+            student.setPosition(clampedX, prevY);
+        } else {
+            student.setPosition(prevX, prevY);
+        }
+
+        double resolvedX = student.getX();
         if (Gdx.input.isKeyPressed(Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
             student.moveUp(dt);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.S) || Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
             student.moveDown(dt);
         }
-
-        // Keep student inside window boundaries
-        double clampedX = Math.max(0, Math.min(640 - student.getWidth(), student.getX()));
         double clampedY = Math.max(0, Math.min(480 - student.getHeight(), student.getY()));
-        student.setPosition(clampedX, clampedY);
+        if (canStudentMoveTo(resolvedX, clampedY)) {
+            student.setPosition(resolvedX, clampedY);
+        } else {
+            student.setPosition(resolvedX, prevY);
+        }
 
         // Slot selection keys (1 to 5)
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) student.getInventory().setSelectedIndex(0);
@@ -444,7 +475,10 @@ public class Main extends Game {
      */
     public void setDifficulty(DifficultyLevel difficulty) {
         if (difficulty == null) return;
-        scoreSystem.setDifficulty(difficulty);
+        this.selectedDifficulty = difficulty;
+        if (scoreSystem != null) {
+            scoreSystem.setDifficulty(difficulty);
+        }
         if (goose != null) {
             goose.setSpeedMultiplier(difficulty.getGooseSpeedModifier().getMultiplier());
         }
@@ -453,11 +487,15 @@ public class Main extends Game {
             + difficulty.getGooseSpeedModifier().getMultiplier() + "x)!");
     }
 
+    public DifficultyLevel getDifficulty() {
+        return selectedDifficulty;
+    }
+
     /**
      * Cycles through difficulty levels: Easy -> Normal -> Hard -> Easy.
      */
     public void cycleDifficulty() {
-        DifficultyLevel current = scoreSystem.getDifficulty();
+        DifficultyLevel current = selectedDifficulty != null ? selectedDifficulty : scoreSystem.getDifficulty();
         if ("Easy".equalsIgnoreCase(current.getName())) {
             setDifficulty(DifficultyLevel.NORMAL);
         } else if ("Normal".equalsIgnoreCase(current.getName())) {
@@ -499,6 +537,7 @@ public class Main extends Game {
         if (font != null) font.dispose();
         if (student != null) student.dispose();
         if (goose != null) goose.dispose();
+        if (hiddenEventManager != null) hiddenEventManager.dispose();
         if (campusMap != null) campusMap.dispose();
     }
 }
