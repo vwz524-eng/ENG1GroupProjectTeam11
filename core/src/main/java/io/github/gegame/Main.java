@@ -25,6 +25,7 @@ public class Main extends ApplicationAdapter {
     private SpriteBatch batch;
     private ShapeRenderer shapeRenderer;
     private BitmapFont font;
+    private CampusMap campusMap;
 
     private Student student;
     private Goose goose;
@@ -56,6 +57,8 @@ public class Main extends ApplicationAdapter {
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
         font = new BitmapFont();
+        campusMap = new CampusMap();
+        campusMap.create();
 
         resetGame();
     }
@@ -189,6 +192,10 @@ public class Main extends ApplicationAdapter {
 
         // Clear screen (dark background)
         ScreenUtils.clear(0.1f, 0.12f, 0.15f, 1f);
+
+        // Display the campus map
+        campusMap.render();
+
 
         // 1. Draw entities using ShapeRenderer
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
@@ -457,6 +464,14 @@ public class Main extends ApplicationAdapter {
         this.colorBlindMode = mode;
     }
 
+
+    @Override
+    public void resize(int width, int height) {
+        super.resize(width, height);
+        if (campusMap != null) {
+            campusMap.resize(width, height);
+        }
+    }
     @Override
     public void dispose() {
         batch.dispose();
@@ -464,5 +479,6 @@ public class Main extends ApplicationAdapter {
         font.dispose();
         student.dispose();
         goose.dispose();
+        campusMap.dispose();
     }
 }

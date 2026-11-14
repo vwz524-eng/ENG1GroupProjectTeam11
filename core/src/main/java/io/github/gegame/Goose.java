@@ -30,6 +30,10 @@ public class Goose extends Sprite {
     private double baseSpeed = 90;
     private double speedMultiplier = 1.0;
 
+    public void setSpeedMultiplier(float multiplier) {
+        this.speedMultiplier = multiplier;
+    }
+
     private double distractTimer = 0;
     private double distractX, distractY;
 
@@ -91,10 +95,12 @@ public class Goose extends Sprite {
         double dx = targetX - centerX();
         double dy = targetY - centerY();
         double dist = Math.hypot(dx, dy);
+
         if (dist > 1) {
-            double speed = getSpeed();
+            double speed = 90;
             x += (dx / dist) * speed * dt;
             y += (dy / dist) * speed * dt;
+
             facing = Direction.fromVector(dx, dy, facing);
         }
 

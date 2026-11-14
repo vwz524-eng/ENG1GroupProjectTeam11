@@ -1,8 +1,7 @@
 package io.github.gegame;
 
-import com.badlogic.gdx.ApplicationAdapter;
+
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
@@ -15,7 +14,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
-public class CampusMap extends ApplicationAdapter {
+public class CampusMap {
 
     private TiledMap map;
     private OrthogonalTiledMapRenderer renderer;
@@ -25,7 +24,6 @@ public class CampusMap extends ApplicationAdapter {
     private float worldWidth;
     private float worldHeight;
 
-    @Override
     public void create() {
 
         // Load the map created in Tiled
@@ -81,12 +79,7 @@ public class CampusMap extends ApplicationAdapter {
         }
     }
 
-    @Override
     public void render() {
-
-        // Clear the screen
-        Gdx.gl.glClearColor(0, 0, 0, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         // Display the campus
         viewport.apply();
@@ -169,14 +162,12 @@ public class CampusMap extends ApplicationAdapter {
         return true;
     }
 
-    @Override
     public void resize(int width, int height) {
         if (viewport != null) {
             viewport.update(width, height, true);
         }
     }
 
-    @Override
     public void dispose() {
 
         if (renderer != null) {
