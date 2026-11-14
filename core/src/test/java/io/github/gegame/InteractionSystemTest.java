@@ -186,5 +186,24 @@ public class InteractionSystemTest {
         assertTrue(outcome.isSuccessful());
         assertEquals(50, player.getScore());
     }
+
+    @Test
+    public void testActionSpamFilterThrottling() {
+        ActionSpamFilter filter = new ActionSpamFilter(0.10); // 100ms threshold
+
+        // First action at t=1.0 is allowed
+        assertTrue(filter.allowAction(1.0));
+
+        // Rapid spam at t=1.02 (< 100ms later) should be throttled/blocked
+        assertFalse(filter.allowAction(1.02));
+        assertFalse(filter.allowAction(1.05));
+
+        // Action at t=1.12 (>= 100ms later) is allowed
+        assertTrue(filter.allowAction(1.12));
+
+        // Reset clears history
+        filter.reset();
+        assertTrue(filter.allowAction(1.13));
+    }
 }
 

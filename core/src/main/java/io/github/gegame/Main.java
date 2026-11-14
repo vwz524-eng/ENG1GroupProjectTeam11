@@ -145,6 +145,7 @@ public class Main extends ApplicationAdapter {
     @Override
     public void render() {
         float dt = Gdx.graphics.getDeltaTime();
+        gameTime += dt;
         handleInput(dt);
 
         boolean isGameRunning = countdownTimer.getRunState().isRunning() && !student.isDead() && !escapeObjective.isCompleted();
@@ -370,8 +371,9 @@ public class Main extends ApplicationAdapter {
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_4)) student.getInventory().setSelectedIndex(3);
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_5)) student.getInventory().setSelectedIndex(4);
 
-        // Interact with nearby Hidden Event (E key)
+        // Interact with nearby Hidden Event (E key) with spam protection (Risk Assessment R21)
         if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
+            if (!spamFilter.allowAction(gameTime)) return;
             HiddenEvent nearby = hiddenEventManager.checkProximity(student);
             if (nearby != null && nearby.canActivate()) {
                 EventOutcome outcome = hiddenEventManager.interact(student);
@@ -382,8 +384,9 @@ public class Main extends ApplicationAdapter {
             }
         }
 
-        // Use selected item (SPACE key)
+        // Use selected item (SPACE key) with spam protection (Risk Assessment R21)
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+            if (!spamFilter.allowAction(gameTime)) return;
             Item selected = student.getInventory().getSelected();
             if (selected != null) {
                 if (selected instanceof DistractionItem) {
