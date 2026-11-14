@@ -17,7 +17,7 @@ Base install is libGDX with extentions:
 
 ### Setup
 
-- Use the command: git clone https://github.com/vwz524-eng/ENG1GroupProjectTeam11.git your://directory or use git GUI
+- Use the command: ```git clone https://github.com/vwz524-eng/ENG1GroupProjectTeam11.git``` or use git GUI
 - [Follow the importing and running a project section of the libGDX setup guide](https://libgdx.com/wiki/start/import-and-running#importing-the-project):
 
 > If you have just generated the project in gdx-liftoff, you may click the option “Open in IntelliJ Idea” to get started right away. Otherwise, continue with the following steps:
