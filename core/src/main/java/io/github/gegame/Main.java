@@ -328,7 +328,7 @@ public class Main extends ApplicationAdapter {
         }
 
         batch.end();
-        
+
         //space -> Shoot
         if (Gdx.input.isKeyPressed(Input.Keys.SPACE)){
             player.shoot();
@@ -338,9 +338,9 @@ public class Main extends ApplicationAdapter {
 				Gdx.input.isKeyPressed(Input.Keys.A),
 				Gdx.input.isKeyPressed(Input.Keys.D),
 				Gdx.input.isKeyPressed(Input.Keys.S),
-				Gdx.input.isKeyPressed(Input.Keys.W), 
+				Gdx.input.isKeyPressed(Input.Keys.W),
 				Gdx.graphics.getDeltaTime());
-				
+
     }
 
     @Override

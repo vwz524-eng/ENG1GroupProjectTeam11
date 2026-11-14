@@ -92,7 +92,7 @@ public class Goose extends Sprite {
         double dy = targetY - centerY();
         double dist = Math.hypot(dx, dy);
         if (dist > 1) {
-            double speed = 90;
+            double speed = getSpeed();
             x += (dx / dist) * speed * dt;
             y += (dy / dist) * speed * dt;
             facing = Direction.fromVector(dx, dy, facing);
@@ -128,5 +128,17 @@ public class Goose extends Sprite {
             shapeRenderer.setColor(0.9f, 0.2f, 0.2f, 1f);
         }
         super.draw(shapeRenderer);
+    }
+
+    public double getSpeed() {
+        return baseSpeed * speedMultiplier;
+    }
+
+    public void setSpeedMultiplier(double speedMultiplier) {
+        this.speedMultiplier = speedMultiplier > 0 ? speedMultiplier : 1.0;
+    }
+
+    public double getSpeedMultiplier() {
+        return speedMultiplier;
     }
 }
