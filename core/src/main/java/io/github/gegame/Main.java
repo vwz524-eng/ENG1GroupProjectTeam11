@@ -1,6 +1,6 @@
 package io.github.gegame;
 
-import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Gdx;
@@ -15,6 +15,7 @@ import io.github.gegame.escape.*;
 import io.github.gegame.hiddenevent.*;
 import io.github.gegame.interaction.ActionSpamFilter;
 import io.github.gegame.inventory.*;
+import io.github.gegame.runlifecycle.Intro_screen;
 import io.github.gegame.score.*;
 
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ import java.util.List;
 /**
  * Main game loop demonstrating Student, Goose, ItemPickups, Inventory, and Timed Escape.
  */
-public class Main extends ApplicationAdapter {
+public class Main extends Game {
     private SpriteBatch batch;
     private ShapeRenderer shapeRenderer;
     private BitmapFont font;
@@ -60,6 +61,19 @@ public class Main extends ApplicationAdapter {
         font = new BitmapFont();
 
         resetGame();
+        setScreen(new Intro_screen());
+    }
+
+    /**
+     * Starts or restarts active gameplay from a menu or end screen.
+     */
+    public void startGameplay() {
+        resetGame();
+        setScreen(null);
+        Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        if (campusMap != null) {
+            campusMap.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        }
     }
 
     private void resetGame() {
@@ -150,6 +164,11 @@ public class Main extends ApplicationAdapter {
 
     @Override
     public void render() {
+        if (getScreen() != null) {
+            super.render();
+            return;
+        }
+
         float dt = Gdx.graphics.getDeltaTime();
         gameTime += dt;
         handleInput(dt);
@@ -345,10 +364,20 @@ public class Main extends ApplicationAdapter {
 
     @Override
     public void dispose() {
+<<<<<<< Updated upstream
         batch.dispose();
         shapeRenderer.dispose();
         font.dispose();
         student.dispose();
         goose.dispose();
+=======
+        super.dispose();
+        if (batch != null) batch.dispose();
+        if (shapeRenderer != null) shapeRenderer.dispose();
+        if (font != null) font.dispose();
+        if (student != null) student.dispose();
+        if (goose != null) goose.dispose();
+        if (campusMap != null) campusMap.dispose();
+>>>>>>> Stashed changes
     }
 }
