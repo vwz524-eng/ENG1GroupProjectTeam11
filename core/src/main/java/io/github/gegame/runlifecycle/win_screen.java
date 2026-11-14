@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import io.github.gegame.Main;
 
 /**
  * Win screen as defined in the Game Class Diagram.
@@ -52,8 +53,11 @@ public class win_screen extends Retry implements Screen {
 
     @Override
     public void Restart_game() {
-        if (Gdx.app != null && Gdx.app.getApplicationListener() instanceof Game) {
-            ((Game) Gdx.app.getApplicationListener()).setScreen(new MainGame());
+        if (Gdx.app != null && Gdx.app.getApplicationListener() instanceof Main) {
+            ((Main) Gdx.app.getApplicationListener()).returnToIntroScreen();
+            dispose();
+        } else if (Gdx.app != null && Gdx.app.getApplicationListener() instanceof Game) {
+            ((Game) Gdx.app.getApplicationListener()).setScreen(new Intro_screen());
             dispose();
         }
     }
