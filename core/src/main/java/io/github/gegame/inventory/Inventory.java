@@ -145,6 +145,24 @@ public class Inventory {
     }
 
     /**
+     * Gets the item with the specified ID.
+     *
+     * @param id the item ID
+     * @return the item, or null if not found
+     */
+    public Item getItem(String id) {
+        if (id == null) {
+            return null;
+        }
+        for (Item item : items) {
+            if (item != null && id.equals(item.getId())) {
+                return item;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Gets the item at the specified index.
      *
      * @param index slot index

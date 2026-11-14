@@ -1,0 +1,131 @@
+@startuml HiddenEventDiscovery
+title Hidden Event Discovery - Class Diagram
+
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+hide empty members
+
+' ===== Classes =====
+class HiddenEvent {
+  - eventId : String
+  - eventType : String
+  - interactionPrompt : String
+  - isDiscovered : boolean
+  - isCompleted : boolean
+  - x : double
+  - y : double
+  - triggerRadius : double
+  + discover() : void
+  + activate(player: Player, inventory: Inventory) : EventOutcome
+  + canActivate() : boolean
+  + resolve() : void
+  + checkTrigger(px: double, py: double) : boolean
+}
+
+class LongBoiStatueEvent {
+  + LongBoiStatueEvent(x: double, y: double)
+}
+
+class TreeAllergyMedEvent {
+  + TreeAllergyMedEvent(x: double, y: double)
+}
+
+class EventOutcome {
+  - outcomeDescription : String
+  - message : String
+  - threatChange : int
+  - scoreBonus : int
+  - revealedItem : Item
+  - healthRestored : int
+  + apply(player: Player, inventory: Inventory) : void
+}
+
+class StatueEventOutcome {
+  + StatueEventOutcome()
+  + apply(player: Player, inventory: Inventory) : void
+}
+
+class TreeEventOutcome {
+  + TreeEventOutcome()
+  + apply(player: Player, inventory: Inventory) : void
+}
+
+class UmbrellaItem {
+  - usesRemaining : int
+  - state : UmbrellaState
+  + use(player: Player) : void
+  + canUse() : boolean
+}
+
+class AllergyMedicationItem {
+  - state : MedicationState
+  + use(player: Player) : void
+}
+
+class HiddenEventManager {
+  - events : List<HiddenEvent>
+  - eventsInteracted : int
+  + registerEvent(event: HiddenEvent) : void
+  + checkProximity(player: Player) : HiddenEvent
+  + interact(player: Player) : EventOutcome
+  + getEventsInteracted() : int
+  + draw(shapeRenderer: ShapeRenderer) : void
+}
+
+interface DiscoveryListener <<interface>> {
+  + onEventDiscovered(event: HiddenEvent) : void
+  + onEventActivated(event: HiddenEvent, outcome: EventOutcome) : void
+}
+
+class EventTrigger {
+  - timeThreshold : int
+  + check() : boolean
+}
+
+class DiscoveryCondition {
+  - requireItem : boolean
+  - requiresTime : boolean
+  - probability : float
+  + evaluate() : boolean
+}
+
+class DiscoveryReward {
+  - scoreBonus : int
+  - revealMessage : String
+  + grant(player: Player) : void
+}
+
+' External Dependencies
+class Player {
+  - health : int
+  + restoreHealth() : void
+}
+
+class Inventory {
+  + addItem(item: Item) : boolean
+}
+
+' ===== Relationships =====
+HiddenEvent <|-- LongBoiStatueEvent
+HiddenEvent <|-- TreeAllergyMedEvent
+
+EventOutcome <|-- StatueEventOutcome
+EventOutcome <|-- TreeEventOutcome
+
+HiddenEvent *-- EventOutcome : produces
+HiddenEvent o-- EventTrigger : has
+HiddenEvent o-- DiscoveryCondition : requires
+HiddenEvent o-- DiscoveryReward : may give
+
+StatueEventOutcome ..> UmbrellaItem : reveals
+TreeEventOutcome ..> AllergyMedicationItem : reveals
+
+HiddenEventManager "1" *-- "0..*" HiddenEvent : manages
+HiddenEventManager ..> DiscoveryListener : notifies
+HiddenEventManager ..> Player : checks proximity
+
+EventOutcome ..> Player : applies effects to
+EventOutcome ..> Inventory : adds reward to
+
+@enduml
+
