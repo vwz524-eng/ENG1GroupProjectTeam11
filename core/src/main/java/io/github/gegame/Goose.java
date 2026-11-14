@@ -97,7 +97,7 @@ public class Goose extends Sprite {
         double dist = Math.hypot(dx, dy);
 
         if (dist > 1) {
-            double speed = 90;
+            double speed = getSpeed();
             x += (dx / dist) * speed * dt;
             y += (dy / dist) * speed * dt;
 
