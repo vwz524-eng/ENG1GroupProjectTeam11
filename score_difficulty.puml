@@ -1,0 +1,91 @@
+@startuml ScoreDifficulty
+title Score and Difficulty - Class Diagram
+
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+hide empty members
+
+' ===== Classes =====
+class ScoreSystem {
+  - currentScore : int
+  - difficulty : DifficultyLevel
+  + addTimeBonus() : void
+  + addDiscoveryBonus() : void
+  + addEscapeBonus() : void
+  + applyPenalty() : void
+  + getScore() : int
+  + setDifficulty(difficulty: DifficultyLevel) : void
+  + getDifficulty() : DifficultyLevel
+}
+
+class DifficultyLevel {
+  - name : String
+  - baseMultiplier : float
+  + getTimerModifier() : TimerModifier
+  + getGooseSpeedModifier() : GooseSpeedModifier
+  + getEventFrequencyModifier() : EventFrequencyModifier
+}
+
+class TimeBonus {
+  - pointsPerSecond : int
+  - points : int
+  + calculate(remainingTime: int) : int
+}
+
+class DiscoveryBonus {
+  - points : int
+  + award(discoveryId: String) : int
+}
+
+class EscapeBonus {
+  - points : int
+  + award(escapeTime: int) : int
+}
+
+class Penalty {
+  - pointsLost : int
+  + apply(reason: String) : int
+}
+
+class TimerModifier {
+  - multiplier : float
+  + modify(baseTime: int) : int
+}
+
+class GooseSpeedModifier {
+  - multiplier : float
+  + modify(baseSpeed: float) : float
+}
+
+class EventFrequencyModifier {
+  - multiplier : float
+  + modify(baseFrequency: float) : float
+}
+
+class GooseDifficulty {
+  - breadcrumbsRequired : int
+  - speedMultiplier : float
+  + forSwarm(swarmNumber: int) : GooseDifficulty
+}
+
+interface ScoreListener <<interface>> {
+  + onScoreChanged(oldScore: int, newScore: int, reason: String) : void
+  + onDifficultyChanged(newDifficulty: DifficultyLevel) : void
+}
+
+' ===== Relationships =====
+ScoreSystem "1" *-- "1" DifficultyLevel : configured with
+ScoreSystem "1" *-- "1" TimeBonus : uses
+ScoreSystem "1" *-- "1" DiscoveryBonus : uses
+ScoreSystem "1" *-- "1" EscapeBonus : uses
+ScoreSystem "1" *-- "1" Penalty : uses
+ScoreSystem ..> ScoreListener : notifies
+
+DifficultyLevel "1" *-- "1" TimerModifier : contains
+DifficultyLevel "1" *-- "1" GooseSpeedModifier : contains
+DifficultyLevel "1" *-- "1" EventFrequencyModifier : contains
+
+DifficultyLevel ..> GooseDifficulty : coordinates with
+
+@enduml
+

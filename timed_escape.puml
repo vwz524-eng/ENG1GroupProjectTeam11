@@ -1,0 +1,63 @@
+@startuml TimedEscape
+title Timed Escape - Class Diagram
+
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+hide empty members
+
+' ===== Classes =====
+class CountdownTimer {
+  - duration : int
+  - remaining : int
+  - warningLevel : WarningLevel
+  - runState : RunState
+  + start() : void
+  + tick() : void
+  + pause() : void
+  + expire() : void
+}
+
+class EscapeObjective {
+  - required : boolean
+  - completed : boolean
+  + complete() : void
+  + isSatisfied() : boolean
+}
+
+enum WarningLevel <<enumeration>> {
+  NORMAL
+  WARNING
+  CRITICAL
+}
+
+class RunState {
+  <<enumeration>>
+  RUNNING
+  PAUSED
+  ESCAPED
+  CAUGHT
+  TIME_EXPIRED
+}
+
+class EscapedState {
+}
+
+class CaughtState {
+}
+
+class TimeExpiredState {
+}
+
+' ===== Inheritance =====
+RunState <|-- EscapedState
+RunState <|-- CaughtState
+RunState <|-- TimeExpiredState
+
+' ===== Associations =====
+CountdownTimer ..> WarningLevel : has current level
+CountdownTimer --> RunState : tracks state
+EscapeObjective ..> CountdownTimer : evaluates
+EscapeObjective ..> RunState : satisfied by
+
+@enduml
+
