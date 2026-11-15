@@ -719,7 +719,7 @@ public class Main extends Game {
                     showNotification("Seeds scattered! " + selected.getQuantity() + " uses left.");
                     playDuckQuack();
                 } else if (selected instanceof AllergyMedicationItem) {
-                    showNotification("Medication used! Resistance doubled (max 20).");
+                    showNotification("Medication used! Resistance increased by 10 (max 20).");
                 } else if (selected instanceof UmbrellaItem) {
                     showNotification("Umbrella open! Protected for 10 seconds.");
                 }

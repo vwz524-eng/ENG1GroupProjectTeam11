@@ -11,8 +11,8 @@ public class TreeEventOutcome extends EventOutcome {
 
     public TreeEventOutcome() {
         super(
-            "Reveals medication (doubles remaining resistance)",
-            "Medication found! Press Space to double remaining resistance (max 20).",
+            "Reveals medication (increase remaining resistance by 10)",
+            "Medication found! Press Space to inrease remaining resistance by 10 (max 20).",
             150
         );
         setRevealedItem(new AllergyMedicationItem());

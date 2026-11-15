@@ -22,7 +22,7 @@ public class AllergyMedicationItem extends FoundItem {
     private MedicationState state;
 
     public AllergyMedicationItem() {
-        super("allergy_medication", "Medication", "Doubles remaining allergy resistance (max 20). One use.", true);
+        super("allergy_medication", "Medication", "Increases allergy resistance by 10 (max 20). One use.", true);
         this.state = MedicationState.COLLECTED;
     }
 
@@ -34,7 +34,7 @@ public class AllergyMedicationItem extends FoundItem {
 
         int current = player.getHealth();
         int maximum = player.getMaxHealth();
-        player.setHealth(Math.min(maximum, current * 2));
+        player.setHealth(Math.min(maximum, current + 10));
 
         state = MedicationState.HEALTH_RESTORED;
         consume();
