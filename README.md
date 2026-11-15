@@ -4,9 +4,12 @@
 The engineering project for year 2 semester 1, as a part of the assessed ENG1 group work module.
 
 ## Links:
-- [Google Drive](https://drive.google.com/drive/folders/1wf2TQGjcnGq4Q_7fKwCeoMQ0QlmTMUd7)
 - [GitHub repository](https://github.com/vwz524-eng/ENG1GroupProjectTeam11)
-- [Sable server](https://matrix.to/#/!PvJOmQRDZRPErukyOv:york.pub?via=york.pub)
+- [Requirements](https://drive.google.com/file/d/11Mytie9KI3iZEPOOJ9tS-L4mZ9c8jBGZ/view?usp=sharing)
+- [Architecture](https://drive.google.com/file/d/1XzefP6n3hTFU0uvGQthoVw56Q9s5tTBt/view?usp=sharing)
+- [Method selection and planning](https://drive.google.com/file/d/1F9ukqdh1B_MeTuvP_Uyjli8DnY3Xbm_b/view?usp=sharing)
+- [Risk assessment and mitigation](https://drive.google.com/file/d/1Oat7ggQ2SMd9TxHEAk2mSKmoI_BSEkph/view?usp=sharing)
+- [Implementation](https://drive.google.com/file/d/19EDOWvqCFHhp6DEZASh-BsXVfewKQRXr/view?usp=sharing)
 
 ## Project Plan
 
@@ -63,3 +66,7 @@ Base install is libGDX with extentions:
 >
 > 
 > Sourced from https://libgdx.com/wiki/start/import-and-running#importing-the-project
+
+## Extra Links
+- [Google Drive](https://drive.google.com/drive/folders/1wf2TQGjcnGq4Q_7fKwCeoMQ0QlmTMUd7)
+- [Sable server](https://matrix.to/#/!PvJOmQRDZRPErukyOv:york.pub?via=york.pub)
