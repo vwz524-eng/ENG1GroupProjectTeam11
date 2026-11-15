@@ -240,7 +240,7 @@ public class Main extends Game {
             }
         });
 
-        showNotification("Escape to Central Hall after 1 minute (before the 5-minute timer expires)!");
+        showNotification("Survive all 3 swarms (before the 5-minute timer expires)!");
     }
 
     /** Difficulty determines initial numbers; each next swarm doubles them. */
@@ -716,7 +716,7 @@ public class Main extends Game {
                     showNotification("Breadcrumbs thrown! Keep feeding to lower Hunger.");
                     playDuckQuack();
                 } else if (selected instanceof DistractionItem) {
-                    showNotification("Seeds scattered! " + selected.getQuantity() + " uses left.");
+                    showNotification("Seeds scattered! ");
                     playDuckQuack();
                 } else if (selected instanceof AllergyMedicationItem) {
                     showNotification("Medication used! Resistance increased by 10 (max 20).");
