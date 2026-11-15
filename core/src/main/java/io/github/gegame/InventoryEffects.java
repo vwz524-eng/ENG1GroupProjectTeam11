@@ -3,13 +3,13 @@ package io.github.gegame;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+
 import io.github.gegame.animation.Direction;
 import io.github.gegame.hiddenevent.AllergyMedicationItem;
 import io.github.gegame.inventory.Bread;
 import io.github.gegame.inventory.DistractionItem;
 import io.github.gegame.inventory.Item;
 
-/** Purely visual, non-violent inventory effects. World uses 640x480 coordinates. */
 public class InventoryEffects {
     private final Texture crumbs, seeds, medication;
     private final Texture umbrellaUp, umbrellaDown, umbrellaLeft, umbrellaRight;
@@ -75,11 +75,13 @@ public class InventoryEffects {
             if (t != null) {
                 float x = (float) student.getX();
                 float y = (float) student.getY();
-                if (d == Direction.UP) { x += 16; y += 42; }
-                else if (d == Direction.DOWN) { x += 16; y += 8; }
-                else if (d == Direction.LEFT) { x -= 15; y += 25; }
-                else { x += 46; y += 25; }
-                batch.draw(t, x, y, 32f, 32f);
+                switch (d) {
+                    case UP -> { x += 16; y += 42; }
+                    case DOWN -> { x += 16; y += 8; }
+                    case LEFT -> { x -= 15; y += 25; }
+                    default -> { x += 46; y += 25; } // RIGHT
+                }
+                batch.draw(t, x, y, 32f, 32f); // replace magic numbes?
             }
         }
     }

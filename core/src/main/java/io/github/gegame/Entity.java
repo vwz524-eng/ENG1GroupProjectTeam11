@@ -107,8 +107,12 @@ public abstract class Entity {
     }
  
    
-    public float centerX() { return getX() + getWidth() / 2f; }
-    public float centerY() { return getY() + getHeight() / 2f; }
+    public float centerX() { 
+        return getX() + getWidth() / 2f; 
+    }
+    public float centerY() {
+        return getY() + getHeight() / 2f;
+    }
  
     public float distanceTo(float px, float py) {
         return (float) Math.hypot(centerX() - px, centerY() - py);

@@ -1,16 +1,17 @@
 package io.github.gegame;
 
-import io.github.gegame.interaction.Interaction;
-import io.github.gegame.interaction.InteractionOutcome;
-import io.github.gegame.inventory.Inventory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import io.github.gegame.interaction.Interaction;
+import io.github.gegame.interaction.InteractionOutcome;
+import io.github.gegame.inventory.Inventory;
+
 /**
- * Represents a playable character in the game.
- * Holds name, score, health, position, facing direction, inventory,
- * and handles interactions.
+ * Represents the playable character or student in the game
+ * Holds the name, score, health, position, facing direction, inventory,
+ * also handles the interactions.
  */
 public class Player extends Sprite {
     private String name = "Player";
@@ -41,16 +42,18 @@ public class Player extends Sprite {
     }
 
     /**
-     * Initiates and executes an interaction for this player.
+     * Initiates and executes an interaction for the student
      *
-     * @param interaction the interaction to execute
+     * @param interaction the interaction to happen
      * @return the outcome of the interaction
      */
     public InteractionOutcome interact(Interaction interaction) {
-        if (interaction == null) {
+        if (interaction == null)
+        {
             return InteractionOutcome.failure("Interaction cannot be null");
         }
-        if (!interactions.contains(interaction)) {
+        if (!interactions.contains(interaction)) 
+        {
             interactions.add(interaction);
         }
         return interaction.execute(this);
@@ -119,28 +122,28 @@ public class Player extends Sprite {
         }
     }
 
-    /**
-     * Fully restores the player's health to maximum.
-     */
+    /* restores player hp, pretty self explainatory  */
     public void restoreHealth() {
         this.health = this.maxHealth;
     }
 
-    /**
-     * Restores the specified amount of health.
-     */
+    /** Restores a specified amount of health */
     public void restoreHealth(int amount) {
         heal(amount);
     }
 
-    public void takeDamage(int amount) {
-        if (amount > 0) {
-            this.health = Math.max(0, health - amount);
-        }
-    }
-
+    /** responsible for murdering the player in a totally non-violent way - 
+     * it's allergies I swear, ignore the fact that we call it death like 193 times in the src code 
+     */
     public boolean isDead() {
         return health <= 0;
+    }
+    
+    // checks hp is not < 0 and setts player health value to hp-dmg taken
+    public void takeDamage(int amount) {
+        if (!isDead()) {
+            this.health = Math.max(0, health - amount);
+        }
     }
 
     public double getFacingX() {
