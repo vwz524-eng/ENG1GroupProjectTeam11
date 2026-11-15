@@ -35,6 +35,7 @@ public class ClockTimer {
         batch.draw(clockImage, x, y, 320 * scale, 200 * scale);
         float dy = y + 62 * scale;
         float w = 40 * scale, h = 80 * scale;
+        
         batch.draw(digits[minutes / 10], x + 48 * scale,  dy, w, h);
         batch.draw(digits[minutes % 10], x + 98 * scale,  dy, w, h);
         batch.draw(digits[seconds / 10], x + 178 * scale, dy, w, h);

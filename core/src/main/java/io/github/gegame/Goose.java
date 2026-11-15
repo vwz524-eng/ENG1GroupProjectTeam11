@@ -3,6 +3,7 @@ package io.github.gegame;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+
 import io.github.gegame.animation.AnimState;
 import io.github.gegame.animation.Direction;
 import io.github.gegame.animation.SpriteAnimator;
@@ -28,17 +29,14 @@ public class Goose extends Sprite {
 
     public static final int MAX_HUNGER = 100;
     private static final int STARTING_HUNGER = 100;
-    private static final double HUNGER_INCREASE_INTERVAL = 2.0;
-    private static final int HUNGER_INCREASE_AMOUNT = 5;
     public static final int HIGH_HUNGER_THRESHOLD = 70;
     private static final double HIGH_HUNGER_SPEED_MULTIPLIER = 1.4;
     private static final int SEED_HUNGER_REDUCTION = 30;
 
     private int hunger = STARTING_HUNGER;
-    private double hungerTimer = 0.0;
-    private double baseSpeed = 90;
+    private final double baseSpeed = 90;
     private double speedMultiplier = 1.0;
-    private int breadHungerReduction = 50; // Swarm 1: 2 crumbs; swarm 2: 4; swarm 3: 6
+    private int breadHungerReduction = 50;
     private double lakeX, lakeY;
     private boolean returningToLake = false;
     private boolean backInLake = false;
@@ -55,9 +53,9 @@ public class Goose extends Sprite {
 
         // frameCount AUTO = frame width equals image height, so automatically divides into how many frames
         initAnimator("geese", "goose")
-            .register(State.IDLE,       SpriteAnimator.AUTO, 0.25f, true)
-            .register(State.WALK,       SpriteAnimator.AUTO, 0.15f, true)
-            .register(State.CHASE,      SpriteAnimator.AUTO, 0.10f, true)
+            .register(State.IDLE, SpriteAnimator.AUTO, 0.25f, true)
+            .register(State.WALK, SpriteAnimator.AUTO, 0.15f, true)
+            .register(State.CHASE, SpriteAnimator.AUTO, 0.10f, true)
             .register(State.DISTRACTED, SpriteAnimator.AUTO, 0.20f, true);
 
         facing = Direction.LEFT; // spawns on the right, looking toward the student
@@ -73,11 +71,11 @@ public class Goose extends Sprite {
 
     public void feed(int amount) {
         if (returningToLake || backInLake) return;
-        eatTimer = 0.7; // short eating pose, then feeding can continue
+        eatTimer = 0.7;
         reduceHunger((int) Math.ceil(breadHungerReduction * Math.max(0, amount) / 10.0));
     }
 
-    /** Where this goose came out of the lake, in the 640x480 gameplay coordinates. */
+    /** Where this goose came out of the lake */
     public void setHomeLake(double x, double y) {
         lakeX = x;
         lakeY = y;
@@ -90,6 +88,7 @@ public class Goose extends Sprite {
 
     public boolean isReturningToLake() { return returningToLake; }
     public boolean hasReturnedToLake() { return backInLake; }
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted") // Can rename, as this is 'is' should be inverted
     public boolean isAvailableForFeeding() { return !returningToLake && !backInLake; }
 
     public void reduceHunger(int amount) {
@@ -116,7 +115,7 @@ public class Goose extends Sprite {
     public boolean isHighHunger() { return hunger >= HIGH_HUNGER_THRESHOLD; }
 
     public boolean isEating() { return eatTimer > 0 || eatingSeeds; }
-    public boolean isDead() { return false; } // Existing API; geese leave rather than die
+    public boolean isDead() { return false; } // Existing API, remember geese leave rather than dying
     public boolean isDistracted() { return distractTimer > 0; }
 
     public void update(double dt, Student student) {
@@ -180,7 +179,7 @@ public class Goose extends Sprite {
             }
         } else if (distractTimer > 0) {
             eatingSeeds = true;
-            state = State.DISTRACTED; // arrived at seeds: stationary eating animation
+            state = State.DISTRACTED; // stationary eating animation
         } else {
             eatingSeeds = false;
             state = State.IDLE;
@@ -191,7 +190,7 @@ public class Goose extends Sprite {
                 reduceHunger(SEED_HUNGER_REDUCTION);
                 seedHungerReduced = true;
             }
-        } // Hunger only goes down when fed, keeping the planned 2/4/6 uses predictable.
+        } // Hunger only goes down when fed
 
         updateAnimation(state, dt);
     }
