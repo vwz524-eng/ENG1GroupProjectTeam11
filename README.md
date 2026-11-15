@@ -10,7 +10,7 @@ The engineering project for year 2 semester 1, as a part of the assessed ENG1 gr
 - [Method selection and planning](https://drive.google.com/file/d/1F9ukqdh1B_MeTuvP_Uyjli8DnY3Xbm_b/view?usp=sharing)
 - [Risk assessment and mitigation](https://drive.google.com/file/d/1Oat7ggQ2SMd9TxHEAk2mSKmoI_BSEkph/view?usp=sharing)
 - [Implementation](https://drive.google.com/file/d/19EDOWvqCFHhp6DEZASh-BsXVfewKQRXr/view?usp=sharing)
-- [executable JAR](https://drive.google.com/file/d/1zGgO_sHhjsMgKHtANNUGa7JDduwbE8Ro/view?usp=sharing)
+- [Executable JAR](https://drive.google.com/file/d/1zGgO_sHhjsMgKHtANNUGa7JDduwbE8Ro/view?usp=sharing)
 
 ## Project Plan
 
