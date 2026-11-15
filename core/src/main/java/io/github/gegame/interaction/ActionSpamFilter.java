@@ -19,7 +19,7 @@ public class ActionSpamFilter {
         this(0.12); // 120ms debounce interval
     }
 
-    /*
+    /**
     Check whether action is allowed or should be blocked due to spam
     @param currentTime current timestamp or cumulative game time in s
     @return true if permitted, false if throttled as spam

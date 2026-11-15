@@ -26,7 +26,7 @@ public class Cooldown {
         this.remainingTime = this.duration;
     }
 
-    /*
+    /**
     Updates the remaining time based on elapsed delta time
     @param deltaTime the elapsed time in seconds
      */
@@ -37,7 +37,7 @@ public class Cooldown {
         }
     }
 
-    /*
+    /**
     Checks if the cooldown has elapsed and the action is ready to execute
     @return true if remainingTime is less than 0, false otherwise
      */

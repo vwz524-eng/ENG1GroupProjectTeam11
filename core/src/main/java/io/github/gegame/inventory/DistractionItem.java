@@ -3,9 +3,8 @@ package io.github.gegame.inventory;
 import io.github.gegame.Goose;
 import io.github.gegame.Player;
 
-/**
- * An item that creates a distraction for geese within a given radius for a duration.
- */
+//An item that creates a distraction for geese within a given radius for a duration
+
 public class DistractionItem extends Item {
     private double radius;
     private double duration;

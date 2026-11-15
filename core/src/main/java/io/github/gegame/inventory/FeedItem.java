@@ -3,9 +3,8 @@ package io.github.gegame.inventory;
 import io.github.gegame.Goose;
 import io.github.gegame.Player;
 
-/**
- * An item that feeds geese to calm or pause them.
- */
+//An item that feeds geese to calm or pause them
+
 public class FeedItem extends Item {
     private int feedAmount;
 

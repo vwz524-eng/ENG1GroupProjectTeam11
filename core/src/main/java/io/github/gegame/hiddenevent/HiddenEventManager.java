@@ -35,7 +35,7 @@ public class HiddenEventManager {
         }
     }
 
-    /*
+    /**
     Checks if player is within range of any hidden event.
     Marks the event as discovered and notifies listeners if newly found
 
@@ -63,7 +63,7 @@ public class HiddenEventManager {
         return null;
     }
 
-    /*
+    /**
     Triggers the nearby hidden event with player
     @param player the player interacting
     @return the resulting EventOutcome, or null if no event is within range
@@ -80,7 +80,7 @@ public class HiddenEventManager {
         return null;
     }
 
-    /*
+    /**
     Directly activates a speficic hidden event.
     @param event the event to activate
     @param player the player interacting
@@ -132,7 +132,7 @@ public class HiddenEventManager {
         }
     }
 
-    /*
+    /**
     Renders hidden event sprites using asset textures
     @param batch the SpriteBatch to draw with
      */
@@ -157,7 +157,7 @@ public class HiddenEventManager {
         }
     }
 
-    /*
+    /**
     Fallback rendered when asset textures are unavailable
     @param shapeRendered the Shaperenderer to draw with
      */

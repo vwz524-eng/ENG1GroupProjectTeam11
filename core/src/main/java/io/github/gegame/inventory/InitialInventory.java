@@ -1,8 +1,7 @@
 package io.github.gegame.inventory;
 
-/**
- * Initializes and populates an inventory with starting items.
- */
+//Initialised and populates an inventory with starting items.
+
 public class InitialInventory {
 
     /**

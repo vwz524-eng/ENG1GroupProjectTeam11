@@ -3,10 +3,11 @@ package io.github.gegame.inventory;
 import io.github.gegame.Player;
 import io.github.gegame.Sprite;
 
-/**
- * In-game pickup entity representing an item placed in the world.
- * Can be picked up by a player on contact and added to their inventory.
+/*
+In game pickup player representing an item places in the world
+Can be picked up by a player on contact and added to their inventory
  */
+
 public class ItemPickup extends Sprite {
     private Item item;
     private boolean collected = false;
@@ -21,10 +22,10 @@ public class ItemPickup extends Sprite {
     }
 
     /**
-     * Called when a player makes contact with this pickup.
-     *
-     * @param player the player touching the pickup
+     * Called when a player makes contact with this pickup
+     * @param player the player touching pickup
      */
+
     public void onPlayerContact(Player player) {
         if (player == null || collected) {
             return;
@@ -38,11 +39,11 @@ public class ItemPickup extends Sprite {
     }
 
     /**
-     * Attempts to add the referenced item to the given inventory.
-     *
+     * Attempts to add the referenced item to the given inventory
      * @param inventory the inventory to add the item into
-     * @return true if added, false if inventory is null/full or already collected
+     * @return true if added, false if inventory is null or full or already collected
      */
+
     public boolean pickUp(Inventory inventory) {
         if (inventory == null || item == null || collected) {
             return false;
@@ -54,10 +55,10 @@ public class ItemPickup extends Sprite {
     }
 
     /**
-     * Checks collision with a player and triggers onPlayerContact if colliding.
-     *
+     * Checks collision with a player and triggers onPlayerContact if colliding
      * @param player the player to check
      */
+
     public void update(Player player) {
         if (!collected && player != null && collidesWith(player)) {
             onPlayerContact(player);

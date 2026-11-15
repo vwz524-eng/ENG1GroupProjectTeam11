@@ -1,8 +1,7 @@
 package io.github.gegame.interaction;
 
-/**
- * Represents an active or triggered distraction in the world.
- */
+//Represents an active or triggered distraction in the world
+
 public class Distraction {
     private double radius;
     private boolean active;
@@ -21,16 +20,14 @@ public class Distraction {
         this.active = active;
     }
 
-    /**
-     * Activates this distraction.
-     */
+    //Activates this distraction
+
     public void trigger() {
         this.active = true;
     }
 
-    /**
-     * Deactivates / dismisses this distraction.
-     */
+    //Deactivates
+
     public void dismiss() {
         this.active = false;
     }

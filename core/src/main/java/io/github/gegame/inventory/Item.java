@@ -4,9 +4,8 @@ import io.github.gegame.Goose;
 import io.github.gegame.Player;
 import java.util.Objects;
 
-/**
- * Abstract base class for all items in the inventory system.
- */
+//Abstract base class for all items in the inventory system
+
 public abstract class Item {
     private String id;
     private String name;
@@ -31,27 +30,27 @@ public abstract class Item {
     }
 
     /**
-     * Abstract method to use the item with the given player.
-     *
+     * Abstract method to use the item with the given player
      * @param player the player using the item
      */
+
     public abstract void use(Player player);
 
     /**
-     * Overloaded method to use the item with a player targeting a goose.
-     *
-     * @param player the player using the item
-     * @param goose the goose being targeted
+     * Overloaded method to use the item with player targeting goose
+     * @param player player using the item
+     * @param goose goose being targeted
      */
+
     public void use(Player player, Goose goose) {
         use(player);
     }
 
     /**
-     * Checks if this item has been used up / depleted.
-     *
-     * @return true if quantity <= 0, false otherwise
+     * Checks if this item has been used up
+     * @return true if quantity less than 0, false otherwise
      */
+
     public boolean isUsedUp() {
         return quantity <= 0;
     }

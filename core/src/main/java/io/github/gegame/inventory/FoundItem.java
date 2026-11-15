@@ -3,9 +3,8 @@ package io.github.gegame.inventory;
 import io.github.gegame.Player;
 import io.github.gegame.Student;
 
-/**
- * A collectible item found in the game world that can be collected and used.
- */
+//A collectible item found in the game world that can be collected and used
+
 public class FoundItem extends Item {
     private boolean isCollected;
 

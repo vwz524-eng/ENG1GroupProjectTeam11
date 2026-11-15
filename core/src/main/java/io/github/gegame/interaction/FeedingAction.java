@@ -2,10 +2,11 @@ package io.github.gegame.interaction;
 
 import io.github.gegame.Player;
 
-/**
- * Feeding action performed by a player.
- * Consumes a FeedItem and produces an InteractionOutcome with points.
+/*
+Feeding action performed by player
+Consumes a FeedItem and produces an InteractionOutcome with points
  */
+
 public class FeedingAction extends Interaction {
     private int feedAmount;
     private FeedItem feedItem;

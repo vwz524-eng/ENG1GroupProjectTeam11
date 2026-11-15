@@ -21,7 +21,7 @@ public class SeedBag extends DistractionItem {
 
     @Override
     public void consume() {
-        // Unlimited uses: quantity never decreases.
+
     }
 }
 

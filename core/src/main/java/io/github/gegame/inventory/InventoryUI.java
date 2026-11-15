@@ -10,9 +10,8 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import io.github.gegame.hiddenevent.UmbrellaItem;
 import io.github.gegame.hiddenevent.AllergyMedicationItem;
 
-/**
- * Renders the inventory HUD (hotbar slots, item labels, and active selection) on screen.
- */
+//Renders the inventory HUD on screen
+
 public class InventoryUI {
     private final Inventory inventory;
     private final Texture seedIcon, breadIcon, umbrellaIcon, medicineIcon;
@@ -61,19 +60,19 @@ public class InventoryUI {
     }
 
     /**
-     * Renders the hotbar slots and contents.
-     *
+     * Renders the hotbar slots and contents
      * @param shapeRenderer renderer for slot boxes
      * @param batch sprite batch for text rendering
      * @param font font for slot numbers and item names
      */
+
     public void render(ShapeRenderer shapeRenderer, SpriteBatch batch, BitmapFont font) {
         if (inventory == null) return;
 
         int capacity = inventory.getCapacity();
         int selected = inventory.getSelectedIndex();
 
-        // 1. Draw Slot Backgrounds
+
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         for (int i = 0; i < capacity; i++) {
             float slotX = x + i * (slotSize + slotSpacing);
@@ -82,7 +81,6 @@ public class InventoryUI {
         }
         shapeRenderer.end();
 
-        // 2. Draw Slot Outlines with Selected Highlight
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         for (int i = 0; i < capacity; i++) {
             float slotX = x + i * (slotSize + slotSpacing);
@@ -97,12 +95,11 @@ public class InventoryUI {
         }
         shapeRenderer.end();
 
-        // 3. Draw Text / Labels
         if (batch != null && font != null) {
             batch.begin();
             for (int i = 0; i < capacity; i++) {
                 float slotX = x + i * (slotSize + slotSpacing);
-                // Draw key number
+
                 font.setColor(Color.LIGHT_GRAY);
                 font.draw(batch, String.valueOf(i + 1), slotX + 4, y + slotSize - 4);
 
@@ -120,7 +117,7 @@ public class InventoryUI {
                         name = name.substring(0, 5) + ".";
                     }
                     font.draw(batch, name, slotX + 3, y + 17);
-                    // All items show either available uses or their remaining cooldown.
+
                     String status = shortStatusFor(item);
                     font.setColor(item.isUsedUp() ? Color.GRAY : Color.YELLOW);
                     font.draw(batch, status, slotX + 3, y + 32);
@@ -150,7 +147,7 @@ public class InventoryUI {
         return item.isUsedUp() ? "0" : String.valueOf(item.getQuantity());
     }
 
-    /** Text shown for each inventory item, including limited uses and cooldowns. */
+    //Text shown for each inventory item, including limited uses and cooldowns.
     private String statusFor(Item item) {
         if (item instanceof Bread) {
             double remaining = ((Bread) item).getCooldownRemaining();

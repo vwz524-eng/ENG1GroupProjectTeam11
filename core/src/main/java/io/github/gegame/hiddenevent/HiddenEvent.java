@@ -51,7 +51,7 @@ public class HiddenEvent {
         this.isDiscovered = true;
     }
 
-    /*
+    /**
     Check if this event can currently be activated by player
     @return true if discovered, not yet completed and conditions met
      */
@@ -60,7 +60,7 @@ public class HiddenEvent {
         return !isCompleted && (condition == null || condition.evaluate()) && (trigger == null || trigger.check());
     }
 
-    /*
+    /**
     Activates this hidden event, applying its outcome to player and inventory
     @param player the player activating event
     @param inventory the player's inventory
@@ -100,7 +100,7 @@ public class HiddenEvent {
         this.isDiscovered = true;
     }
 
-    /*
+    /**
     Checks if given world coordinates fall within this event's trigger radius.
 
     @param px the X coordinate to check

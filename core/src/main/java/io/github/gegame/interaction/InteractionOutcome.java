@@ -1,8 +1,7 @@
 package io.github.gegame.interaction;
 
-/**
- * Represents the result produced by executing an interaction.
- */
+//Represents the result produced by executing an interaction
+
 public class InteractionOutcome {
     private boolean successful;
     private String message;

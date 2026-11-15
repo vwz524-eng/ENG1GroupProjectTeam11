@@ -2,10 +2,11 @@ package io.github.gegame.interaction;
 
 import io.github.gegame.Player;
 
-/**
- * Abstract base class for player interactions.
- * Regulated by a Cooldown and produces an InteractionOutcome.
+/*
+Abstraction base class for player interactions
+Regulated by cooldown and produced an InteractionOutcome
  */
+
 public abstract class Interaction {
     private double range;
     private Cooldown cooldown;
@@ -21,20 +22,20 @@ public abstract class Interaction {
     }
 
     /**
-     * Checks if this interaction can currently be executed.
-     *
-     * @return true if ready (cooldown finished), false otherwise
+    Checks if this interaction can currently be executed
+    @return true if ready, false otherwise.
      */
+
     public boolean canExecute() {
         return cooldown != null && cooldown.isReady();
     }
 
     /**
-     * Executes the interaction for the given player.
-     *
-     * @param player the player performing the interaction
-     * @return the outcome produced by the interaction
+    Executes the interaction for the given player
+    @param player the player performing the interaction
+    @return the outcome produced by the interaction
      */
+
     public abstract InteractionOutcome execute(Player player);
 
     public double getRange() {

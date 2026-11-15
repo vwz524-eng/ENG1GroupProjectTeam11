@@ -4,11 +4,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Manages an inventory of items with a fixed or configurable capacity.
- * Supports the Observer pattern via {@link InventoryListener} so score,
- * difficulty, and UI subsystems can react to inventory changes.
+/*
+Manages an inventory of items with a fixed or configurable capacity.
+Supports the Observer pattern via InventoryListener so score,
+difficulty, and UI subsystems can react to inventory changes
  */
+
 public class Inventory {
     public static final int DEFAULT_CAPACITY = 5;
 
@@ -28,11 +29,11 @@ public class Inventory {
     }
 
     /**
-     * Adds an item to the inventory if space is available.
-     *
+     * Adds an item to the inventory if space is available
      * @param item the item to add
      * @return true if the item was added, false if inventory is full or item is null
      */
+
     public boolean addItem(Item item) {
         if (item == null || isFull()) {
             return false;
@@ -56,11 +57,11 @@ public class Inventory {
     }
 
     /**
-     * Removes an item from the inventory.
-     *
+     * Removed an item from the inventory
      * @param item the item to remove
      * @return true if the item was found and removed, false otherwise
      */
+
     public boolean removeItem(Item item) {
         if (item == null) {
             return false;
@@ -73,11 +74,11 @@ public class Inventory {
     }
 
     /**
-     * Checks if the inventory contains the given item.
-     *
+     * Checks if the inventory contins the given item.
      * @param item the item to check
      * @return true if present, false otherwise
      */
+
     public boolean hasItem(Item item) {
         if (item == null) {
             return false;
@@ -86,11 +87,11 @@ public class Inventory {
     }
 
     /**
-     * Checks if the inventory contains an item with the given ID.
-     *
+     * Checks if the inventory contains an item with the given ID
      * @param id the item ID
      * @return true if an item with matching ID exists, false otherwise
      */
+
     public boolean hasItem(String id) {
         if (id == null) {
             return false;
@@ -104,10 +105,10 @@ public class Inventory {
     }
 
     /**
-     * Checks whether the inventory has reached its capacity.
-     *
+     * Checks whether the inventory has reached its capacity
      * @return true if full, false otherwise
      */
+
     public boolean isFull() {
         int count = 0;
         for (Item item : items) {
@@ -145,11 +146,11 @@ public class Inventory {
     }
 
     /**
-     * Gets the item with the specified ID.
-     *
+     * Gets the item with the specified ID
      * @param id the item ID
      * @return the item, or null if not found
      */
+
     public Item getItem(String id) {
         if (id == null) {
             return null;
@@ -163,11 +164,11 @@ public class Inventory {
     }
 
     /**
-     * Gets the item at the specified index.
-     *
+     * Gets the item at the specified index
      * @param index slot index
      * @return the item, or null if empty or out of range
      */
+
     public Item getItem(int index) {
         if (index >= 0 && index < items.size()) {
             return items.get(index);
@@ -176,11 +177,11 @@ public class Inventory {
     }
 
     /**
-     * Sets or replaces an item at the specified slot index.
-     *
+     * Sets or replaces an item at the specified slot index
      * @param index slot index
-     * @param item item to place
+     * @return item item to place
      */
+    
     public void setItem(int index, Item item) {
         if (index < 0 || index >= capacity) {
             return;

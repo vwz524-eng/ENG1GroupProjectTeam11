@@ -1,8 +1,7 @@
 package io.github.gegame.interaction;
 
-/**
- * Represents a consumable feed item used in the interaction system.
- */
+//Represents a consumable feed item used in the interaction system
+
 public class FeedItem {
     private String name;
     private int nutritionValue;
@@ -25,10 +24,10 @@ public class FeedItem {
     }
 
     /**
-     * Consumes one unit of this feed item.
-     *
-     * @return true if successfully consumed, false if no quantity remaining
+    Consumes one unit of this feed item
+    @return true if successfully consumed, false if no quantity remaining
      */
+
     public boolean consume() {
         if (quantity > 0) {
             quantity--;

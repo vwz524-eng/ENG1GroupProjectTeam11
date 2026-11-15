@@ -2,10 +2,11 @@ package io.github.gegame.interaction;
 
 import io.github.gegame.Player;
 
-/**
- * Distraction action performed by a player.
- * Triggers a Distraction and produces an InteractionOutcome with points.
+/*
+Distraction action performed by a player
+Triggers a distraction and produces an InteractionOutcome with points
  */
+
 public class DistractionAction extends Interaction {
     private double distractionPower;
     private Distraction distraction;
