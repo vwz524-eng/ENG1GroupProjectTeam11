@@ -4,9 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Manages player scoring and difficulty configuration.
- * All score state is strictly encapsulated. Modifiers and difficulty multipliers
- * dynamically scale bonuses from time survival, hidden event discoveries, and escapes.
+ * Manages player scoring and difficulty configuration
+ * bonuses from time survival, hidden event discoveries, and escapes
  */
 public class ScoreSystem {
     private int currentScore;

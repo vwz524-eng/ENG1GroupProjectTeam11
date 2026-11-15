@@ -1,23 +1,20 @@
 package io.github.gegame.score;
 
-/**
- * Observer listener interface for score and difficulty changes.
- */
 public interface ScoreListener {
 
     /**
-     * Called whenever the player's score changes.
+     * Listens for the player's score changing
      *
      * @param oldScore previous score
-     * @param newScore updated score
-     * @param reason   description or category of change
+     * @param newScore new score
+     * @param reason why the score has changed
      */
     void onScoreChanged(int oldScore, int newScore, String reason);
 
     /**
-     * Called when difficulty level changes.
+     * Called when difficulty level changes
      *
-     * @param newDifficulty the new difficulty setting
+     * @param newDifficulty new difficulty setting
      */
     void onDifficultyChanged(DifficultyLevel newDifficulty);
 }

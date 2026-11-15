@@ -1,9 +1,8 @@
 package io.github.gegame.score;
 
 /**
- * Calculates time-based bonuses.
- * Gives points the longer the player survives in the game, up to the 5-minute limit,
- * or based on remaining time upon successful escape.
+ * Gives points the longer the player survives in the game, up to the 5 minutes
+ * or based on remaining time upon successful escape
  */
 public class TimeBonus {
     private int pointsPerSecond;
@@ -19,10 +18,10 @@ public class TimeBonus {
     }
 
     /**
-     * Calculates the time bonus based on remaining seconds.
+     * Calculates the additional time bonus
      *
-     * @param remainingTime time in seconds
-     * @return points awarded
+     * @param remainingTime time (s)
+     * @return number of points awared to score
      */
     public int calculate(int remainingTime) {
         if (remainingTime <= 0) {
