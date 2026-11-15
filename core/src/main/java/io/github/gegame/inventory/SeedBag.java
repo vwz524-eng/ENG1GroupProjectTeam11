@@ -1,17 +1,14 @@
 
+
 package io.github.gegame.inventory;
 
-/**
- * Unlimited seed bag used to distract nearby geese.
- * Has a 5-second cooldown between successful uses.
- */
 public class SeedBag extends DistractionItem {
 
     public SeedBag() {
         super(
             "seed_bag",
             "Seed Bag",
-            "Unlimited birdseed (5-second cooldown)",
+            "Unlimited birdseed - no cooldown",
             150.0,
             5.0
         );
@@ -24,6 +21,7 @@ public class SeedBag extends DistractionItem {
 
     @Override
     public void consume() {
-        // Unlimited uses: do not reduce quantity.
+        // Unlimited uses: quantity never decreases.
     }
 }
+
