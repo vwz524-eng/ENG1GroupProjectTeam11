@@ -33,9 +33,9 @@ public class Student extends Player {
         public String fileToken() { return token; }
     }
 
-    private static final int MAX_HEALTH = 100;
+    private static final int MAX_HEALTH = 20;
     private static final double SPEED = 150; // pixels per second
-    private static final int GOOSE_DAMAGE = 10;
+    private static final int GOOSE_DAMAGE = 1;
     private static final double HIT_COOLDOWN = 1.0; // seconds of safety after goose attack
     private static final double UMBRELLA_SECONDS = 10.0;
     private static final double THROW_SECONDS = 0.35; // how long the throw pose is held
@@ -53,9 +53,9 @@ public class Student extends Player {
 
         // frameCount AUTO = "frame width equals image height"; pass a number if your sheets differ.
         initAnimator("characters", "student")
-                .register(State.IDLE,  SpriteAnimator.AUTO, 0.25f, true)
-                .register(State.WALK,  SpriteAnimator.AUTO, 0.12f, true)
-                .register(State.THROW, SpriteAnimator.AUTO, 0.10f, false);
+            .register(State.IDLE,  SpriteAnimator.AUTO, 0.25f, true)
+            .register(State.WALK,  SpriteAnimator.AUTO, 0.12f, true)
+            .register(State.THROW, SpriteAnimator.AUTO, 0.10f, false);
     }
 
     public void useSelectedItem(Goose goose) {
@@ -71,54 +71,52 @@ public class Student extends Player {
         }
     }
 
-    public void useSelectedItem(List<Goose> geese) {
+    public boolean useSelectedItem(List<Goose> geese) {
         Item item = inventory.getSelected();
         if (item == null || item.isUsedUp()) {
-            return;
+            return false;
         }
 
         if (item instanceof DistractionItem) {
             DistractionItem distraction = (DistractionItem) item;
-            double targetX = getX() + getFacingX() * 50.0;
-            double targetY = getY() + getFacingY() * 50.0;
-            List<Goose> livingGeese = new ArrayList<>();
+            double targetX = centerX() + getFacingX() * 50.0;
+            double targetY = centerY() + getFacingY() * 50.0;
+            int affected = 0;
             if (geese != null) {
                 for (Goose g : geese) {
-                    if (g != null && !g.isDead()) {
-                        livingGeese.add(g);
-                    }
+                    if (affected >= 10) break;
+                    if (g == null || !g.isAvailableForFeeding()) continue;
+                    double distance = Math.hypot(g.centerX() - targetX, g.centerY() - targetY);
+                    if (distance > distraction.getRadius()) continue;
+                    double offsetX = (affected % 5 - 2) * 12.0;
+                    g.distract(targetX + offsetX, targetY, distraction.getDuration());
+                    affected++;
                 }
             }
-            int count = livingGeese.size();
-            for (int i = 0; i < count; i++) {
-                double offsetX = (i - (count - 1) / 2.0) * 32.0;
-                double gx = Math.max(16.0, Math.min(624.0, targetX + offsetX));
-                double gy = Math.max(16.0, Math.min(464.0, targetY));
-                livingGeese.get(i).distract(gx, gy, distraction.getDuration());
-            }
-            distraction.consume();
+            if (affected == 0) return false;
+            distraction.consume(); // Five uses overall; each Space press uses one.
             throwTimer = THROW_SECONDS;
+            return true;
         } else if (item instanceof Bread) {
             Bread bread = (Bread) item;
-            if (bread.isOnCooldown()) {
-                return;
-            }
+            if (bread.isOnCooldown()) return false;
             Goose target = findNearestLivingGoose(geese);
-            if (target != null) {
-                target.feed(bread.getFeedAmount());
-            }
+            if (target == null) return false;
+            target.feed(bread.getFeedAmount());
             bread.startCooldown();
             throwTimer = THROW_SECONDS;
+            return true;
         } else if (item instanceof FeedItem) {
             FeedItem feed = (FeedItem) item;
             Goose target = findNearestLivingGoose(geese);
-            if (target != null) {
-                target.feed(feed.getFeedAmount());
-            }
+            if (target == null) return false;
+            target.feed(feed.getFeedAmount());
             feed.consume();
             throwTimer = THROW_SECONDS;
+            return true;
         } else {
-            item.use(this);
+            item.use(this); // Umbrella (3 activations) or medication (1 activation)
+            return true;
         }
     }
 
@@ -129,7 +127,7 @@ public class Student extends Player {
         Goose nearest = null;
         double bestDist = Double.MAX_VALUE;
         for (Goose g : geese) {
-            if (g == null || g.isDead()) {
+            if (g == null || !g.isAvailableForFeeding()) {
                 continue;
             }
             double dist = Math.hypot(g.centerX() - centerX(), g.centerY() - centerY());
@@ -163,8 +161,8 @@ public class Student extends Player {
         // Pick the animation: throw beats walk beats idle.
         facing = Direction.fromVector(facingX, facingY, facing);
         State state = throwTimer > 0 ? State.THROW
-                : movedThisFrame ? State.WALK
-                : State.IDLE;
+            : movedThisFrame ? State.WALK
+            : State.IDLE;
         movedThisFrame = false; // move*() sets it again next frame if a key is still held
         updateAnimation(state, dt);
     }
@@ -210,7 +208,7 @@ public class Student extends Player {
     }
 
     public void checkGooseCollision(Goose goose) {
-        if (goose == null || goose.isEating() || goose.isDead()) {
+        if (goose == null || goose.isEating() || !goose.isAvailableForFeeding()) {
             return;
         }
         if (collidesWith(goose)) {
@@ -221,7 +219,7 @@ public class Student extends Player {
     @Override
     public void takeDamage(int amount) {
         if (hasUmbrella() || hitCooldown > 0) return; // protected, nothing happens
-        health = health - amount;
+        health = Math.max(0, health - amount);
         hitCooldown = HIT_COOLDOWN; // so one touch doesn't hurt every frame
     }
 

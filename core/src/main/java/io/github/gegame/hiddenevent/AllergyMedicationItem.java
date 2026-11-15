@@ -7,7 +7,7 @@ import io.github.gegame.inventory.FoundItem;
  * Allergy medication discovered by investigating the tree outside Central Hall.
  * Follows the Tree Allergy Medication State Diagram:
  * Hidden -> Discovered -> Collected -> HealthRestored.
- * Heals the player by 50 health points (capped at max health).
+ * Doubles remaining allergy resistance, capped at the maximum of 20.
  */
 public class AllergyMedicationItem extends FoundItem {
 
@@ -18,12 +18,11 @@ public class AllergyMedicationItem extends FoundItem {
         HEALTH_RESTORED
     }
 
-    public static final int HEAL_AMOUNT = 50;
 
     private MedicationState state;
 
     public AllergyMedicationItem() {
-        super("allergy_medication", "Medication", "Heals 50 health up to maximum health. Single use.", true);
+        super("allergy_medication", "Medication", "Doubles remaining allergy resistance (max 20). One use.", true);
         this.state = MedicationState.COLLECTED;
     }
 
@@ -33,7 +32,9 @@ public class AllergyMedicationItem extends FoundItem {
             return;
         }
 
-        player.heal(HEAL_AMOUNT);
+        int current = player.getHealth();
+        int maximum = player.getMaxHealth();
+        player.setHealth(Math.min(maximum, current * 2));
 
         state = MedicationState.HEALTH_RESTORED;
         consume();

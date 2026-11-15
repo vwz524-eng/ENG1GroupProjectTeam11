@@ -27,23 +27,21 @@ public class Goose extends Sprite {
     }
 
     public static final int MAX_HUNGER = 100;
-    private static final int STARTING_HUNGER = 20;
+    private static final int STARTING_HUNGER = 100;
     private static final double HUNGER_INCREASE_INTERVAL = 2.0;
     private static final int HUNGER_INCREASE_AMOUNT = 5;
     public static final int HIGH_HUNGER_THRESHOLD = 70;
     private static final double HIGH_HUNGER_SPEED_MULTIPLIER = 1.4;
-    private static final int BREAD_HUNGER_REDUCTION = 40;
     private static final int SEED_HUNGER_REDUCTION = 30;
 
-    private int health = 30;
     private int hunger = STARTING_HUNGER;
     private double hungerTimer = 0.0;
     private double baseSpeed = 90;
     private double speedMultiplier = 1.0;
-
-    public void setSpeedMultiplier(float multiplier) {
-        this.speedMultiplier = multiplier;
-    }
+    private int breadHungerReduction = 50; // Swarm 1: 2 crumbs; swarm 2: 4; swarm 3: 6
+    private double lakeX, lakeY;
+    private boolean returningToLake = false;
+    private boolean backInLake = false;
 
     private double distractTimer = 0;
     private double distractX, distractY;
@@ -57,10 +55,10 @@ public class Goose extends Sprite {
 
         // frameCount AUTO = frame width equals image height, so automatically divides into how many frames
         initAnimator("geese", "goose")
-                .register(State.IDLE,       SpriteAnimator.AUTO, 0.25f, true)
-                .register(State.WALK,       SpriteAnimator.AUTO, 0.15f, true)
-                .register(State.CHASE,      SpriteAnimator.AUTO, 0.10f, true)
-                .register(State.DISTRACTED, SpriteAnimator.AUTO, 0.20f, true);
+            .register(State.IDLE,       SpriteAnimator.AUTO, 0.25f, true)
+            .register(State.WALK,       SpriteAnimator.AUTO, 0.15f, true)
+            .register(State.CHASE,      SpriteAnimator.AUTO, 0.10f, true)
+            .register(State.DISTRACTED, SpriteAnimator.AUTO, 0.20f, true);
 
         facing = Direction.LEFT; // spawns on the right, looking toward the student
     }
@@ -74,13 +72,35 @@ public class Goose extends Sprite {
     }
 
     public void feed(int amount) {
-        eatTimer = 2.0;
-        reduceHunger(Math.max(BREAD_HUNGER_REDUCTION, amount));
+        if (returningToLake || backInLake) return;
+        eatTimer = 0.7; // short eating pose, then feeding can continue
+        reduceHunger((int) Math.ceil(breadHungerReduction * Math.max(0, amount) / 10.0));
     }
+
+    /** Where this goose came out of the lake, in the 640x480 gameplay coordinates. */
+    public void setHomeLake(double x, double y) {
+        lakeX = x;
+        lakeY = y;
+    }
+
+    /** Swarm 1 needs 2 breadcrumbs, swarm 2 needs 4, swarm 3 needs 6. */
+    public void setSwarm(int swarm) {
+        breadHungerReduction = swarm == 1 ? 50 : (swarm == 2 ? 25 : 17);
+    }
+
+    public boolean isReturningToLake() { return returningToLake; }
+    public boolean hasReturnedToLake() { return backInLake; }
+    public boolean isAvailableForFeeding() { return !returningToLake && !backInLake; }
 
     public void reduceHunger(int amount) {
         if (amount > 0) {
             hunger = Math.max(0, hunger - amount);
+            if (hunger == 0) {
+                returningToLake = true;
+                eatingSeeds = false;
+                eatTimer = 0;
+                distractTimer = 0;
+            }
         }
     }
 
@@ -96,13 +116,26 @@ public class Goose extends Sprite {
     public boolean isHighHunger() { return hunger >= HIGH_HUNGER_THRESHOLD; }
 
     public boolean isEating() { return eatTimer > 0 || eatingSeeds; }
-    public boolean isDead() { return health <= 0; }
+    public boolean isDead() { return false; } // Existing API; geese leave rather than die
     public boolean isDistracted() { return distractTimer > 0; }
 
     public void update(double dt, Student student) {
-        if (isDead()) {
-            eatingSeeds = false;
-            updateAnimation(State.IDLE, dt);
+        if (backInLake) return;
+
+        if (returningToLake) {
+            double dx = lakeX - centerX();
+            double dy = lakeY - centerY();
+            double distance = Math.hypot(dx, dy);
+            if (distance < 5) {
+                backInLake = true;
+                updateAnimation(State.IDLE, dt);
+            } else {
+                double step = Math.min(baseSpeed * speedMultiplier * dt, distance);
+                x += dx / distance * step;
+                y += dy / distance * step;
+                facing = Direction.fromVector(dx, dy, facing);
+                updateAnimation(State.WALK, dt);
+            }
             return;
         }
 
@@ -158,13 +191,7 @@ public class Goose extends Sprite {
                 reduceHunger(SEED_HUNGER_REDUCTION);
                 seedHungerReduced = true;
             }
-        } else {
-            hungerTimer += dt;
-            while (hungerTimer >= HUNGER_INCREASE_INTERVAL) {
-                hungerTimer -= HUNGER_INCREASE_INTERVAL;
-                increaseHunger(HUNGER_INCREASE_AMOUNT);
-            }
-        }
+        } // Hunger only goes down when fed, keeping the planned 2/4/6 uses predictable.
 
         updateAnimation(state, dt);
     }
@@ -174,9 +201,8 @@ public class Goose extends Sprite {
     public void draw(SpriteBatch batch) {
         if (batch == null) return;
 
-        if (isDead()) {
-            batch.setColor(0.4f, 0.4f, 0.4f, 1f);
-        } else if (isEating()) {
+        if (backInLake) return;
+        if (isEating()) {
             batch.setColor(1f, 0.8f, 0.5f, 1f);
         }
         super.draw(batch);
@@ -186,9 +212,8 @@ public class Goose extends Sprite {
     // Fallback, used when texture couldnt be loaded
     @Override
     public void draw(ShapeRenderer shapeRenderer) {
-        if (isDead()) {
-            shapeRenderer.setColor(0.4f, 0.4f, 0.4f, 1f);
-        } else if (isEating()) {
+        if (backInLake) return;
+        if (isEating()) {
             shapeRenderer.setColor(0.9f, 0.6f, 0.1f, 1f);
         } else if (isDistracted()) {
             shapeRenderer.setColor(1f, 1f, 0.2f, 1f);
@@ -199,13 +224,13 @@ public class Goose extends Sprite {
     }
 
     public void drawHungerBar(ShapeRenderer shapeRenderer, boolean colorBlindMode) {
-        if (shapeRenderer == null || isDead()) {
+        if (shapeRenderer == null || backInLake) {
             return;
         }
         float barWidth = 36f;
         float barHeight = 5f;
         float barX = (float) x - 2f;
-        float barY = (float) Math.min(472.0, y + height + 4.0);
+        float barY = (float) Math.min(454.0, y + height + 4.0);
 
         shapeRenderer.setColor(0.1f, 0.1f, 0.1f, 0.85f);
         shapeRenderer.rect(barX - 1f, barY - 1f, barWidth + 2f, barHeight + 2f);

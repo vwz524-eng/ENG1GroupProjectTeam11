@@ -7,7 +7,7 @@ import io.github.gegame.Player;
  * Bread feed item, fed to geese to reduce their hunger on a 10-second cooldown.
  */
 public class Bread extends FeedItem {
-    public static final double COOLDOWN_SECONDS = 10.0;
+    public static final double COOLDOWN_SECONDS = 5.00;
     private double cooldownTimer = 0.0;
 
     public Bread() {

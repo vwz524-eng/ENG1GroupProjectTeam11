@@ -11,6 +11,8 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
+import java.util.Iterator;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.Timer;
 import io.github.gegame.escape.*;
@@ -37,6 +39,11 @@ public class Main extends Game {
     private final List<Goose> geese = new ArrayList<>();
     private final List<ItemPickup> pickups = new ArrayList<>();
     private InventoryUI inventoryUI;
+    private InventoryEffects inventoryEffects;
+    private int itemsUsed = 0;
+    private int currentSwarm = 0;
+    private float swarmBannerTimer = 0f;
+    private static final int TOTAL_SWARMS = 3;
 
     // Timed Escape system components
     private CountdownTimer countdownTimer;
@@ -85,6 +92,7 @@ public class Main extends Game {
         clockTimer = new ClockTimer(250, 418, 0.3f);
         campusMap = new CampusMap();
         campusMap.create();
+        inventoryEffects = new InventoryEffects();
 
         resetGame();
         initAudio();
@@ -165,7 +173,10 @@ public class Main extends Game {
         if (hiddenEventManager != null) hiddenEventManager.dispose();
 
         student = new Student(100, 240);
-        spawnGeeseForDifficulty();
+        if (inventoryEffects != null) inventoryEffects.reset();
+        itemsUsed = 0;
+        currentSwarm = 0;
+        spawnSwarm(1);
         scoreSystem = new ScoreSystem(selectedDifficulty);
         student.setScore(0);
         wasTouchingLockedCentralHall = false;
@@ -179,6 +190,7 @@ public class Main extends Game {
         // SeedBag and Bread are in the starting inventory (InitialInventory);
         // Umbrella is only obtained from the Long Boi hidden event.
 
+        if (inventoryUI != null) inventoryUI.dispose();
         inventoryUI = new InventoryUI(student.getInventory());
 
         // Initialize Hidden Event Discovery aligned with campus.tmx Long Boi & Tree
@@ -231,18 +243,34 @@ public class Main extends Game {
         showNotification("Escape to Central Hall after 1 minute (before the 5-minute timer expires)!");
     }
 
-    private void spawnGeeseForDifficulty() {
-        int gooseCount = getGooseCountForDifficulty(selectedDifficulty);
-        float[][] spawnPoints = {
-            {480f, 240f},
-            {340f, 340f},
-            {360f, 120f}
-        };
-        double speedMultiplier = selectedDifficulty.getGooseSpeedModifier().getMultiplier();
+    /** Difficulty determines initial numbers; each next swarm doubles them. */
+    private void spawnSwarm(int swarmNumber) {
+        currentSwarm = swarmNumber;
+        swarmBannerTimer = 3f; // Giant FEED THE GEESE!!! prompt
+        int gooseCount = getGooseCountForDifficulty(selectedDifficulty) * (1 << (swarmNumber - 1));
+        List<Vector2> lakeWorld = campusMap.getLakeCenters();
+        if (lakeWorld.isEmpty()) {
+            Gdx.app.error("Goose", "No lake rectangles found in the Tiled Collision layer");
+            return;
+        }
+
+        double roundSpeed = swarmNumber == 1 ? 0.50
+            : swarmNumber == 2 ? 0.60
+            : 0.70;
+
+        double speed = selectedDifficulty
+            .getGooseSpeedModifier()
+            .getMultiplier() * roundSpeed;
+
         for (int i = 0; i < gooseCount; i++) {
-            Goose g = new Goose(spawnPoints[i][0], spawnPoints[i][1]);
-            g.setSpeedMultiplier(speedMultiplier);
-            geese.add(g);
+            Vector2 point = lakeWorld.get((i + swarmNumber - 1) % lakeWorld.size());
+            double lakeX = point.x / WORLD_SCALE_X;
+            double lakeY = point.y / WORLD_SCALE_Y;
+            Goose goose = new Goose(lakeX - 16, lakeY - 16);
+            goose.setHomeLake(lakeX, lakeY);
+            goose.setSwarm(swarmNumber);
+            goose.setSpeedMultiplier(speed);
+            geese.add(goose);
         }
     }
 
@@ -251,6 +279,30 @@ public class Main extends Game {
         if ("Hard".equalsIgnoreCase(difficulty.getName())) return 3;
         if ("Normal".equalsIgnoreCase(difficulty.getName())) return 2;
         return 1;
+    }
+
+    /** When all geese in the current swarm have gone back to lakes, continue or win. */
+    private void updateSwarmProgress() {
+        Iterator<Goose> iterator = geese.iterator();
+        while (iterator.hasNext()) {
+            Goose goose = iterator.next();
+            if (goose.hasReturnedToLake()) {
+                goose.dispose();
+                iterator.remove();
+            }
+        }
+        if (!geese.isEmpty()) return;
+        if (currentSwarm < TOTAL_SWARMS) {
+            spawnSwarm(currentSwarm + 1);
+        } else if (!escapeObjective.isCompleted()) {
+            escapeObjective.complete();
+            countdownTimer.setRunState(RunState.ESCAPED);
+            scoreSystem.addEscapeBonus(countdownTimer.getRemaining());
+            scoreSystem.addTimeBonus(countdownTimer.getRemaining());
+            student.setScore(scoreSystem.getScore());
+            playDuckQuack();
+            showNotification("All three swarms fed! You reached Central Hall in time!");
+        }
     }
 
     /**
@@ -262,11 +314,11 @@ public class Main extends Game {
         for (int pass = 0; pass < 2; pass++) {
             for (int i = 0; i < geese.size(); i++) {
                 Goose g1 = geese.get(i);
-                if (g1 == null || g1.isDead()) continue;
+                if (g1 == null || !g1.isAvailableForFeeding()) continue;
 
                 for (int j = i + 1; j < geese.size(); j++) {
                     Goose g2 = geese.get(j);
-                    if (g2 == null || g2.isDead()) continue;
+                    if (g2 == null || !g2.isAvailableForFeeding()) continue;
 
                     double dx = g2.centerX() - g1.centerX();
                     double dy = g2.centerY() - g1.centerY();
@@ -326,6 +378,10 @@ public class Main extends Game {
         float dt = Gdx.graphics.getDeltaTime();
         gameTime += dt;
         handleInput(dt);
+        if (countdownTimer.getRunState().isRunning()) {
+            swarmBannerTimer = Math.max(0f, swarmBannerTimer - dt);
+            inventoryEffects.update(dt);
+        }
 
         boolean isGameRunning = countdownTimer.getRunState().isRunning() && !student.isDead() && !escapeObjective.isCompleted();
         HiddenEvent nearbyEvent = isGameRunning ? hiddenEventManager.checkProximity(student) : null;
@@ -341,32 +397,21 @@ public class Main extends Game {
             }
             resolveGooseCollisions();
             for (Goose g : geese) {
-                student.checkGooseCollision(g);
+                if (swarmBannerTimer <= 0) student.checkGooseCollision(g);
             }
+            updateSwarmProgress();
 
-            // Win only after 1 minute has elapsed AND player touches Central Hall
-            int elapsedSeconds = countdownTimer.getDuration() - countdownTimer.getRemaining();
-            boolean centralHallUnlocked = elapsedSeconds >= CENTRAL_HALL_UNLOCK_SECONDS;
+            // The goal unlocks automatically once the third swarm has returned to its lakes.
+            // Reaching the hall early is not an instant victory.
             double hitboxRight = student.getX() + STUDENT_HITBOX_OFFSET_X + STUDENT_HITBOX_WIDTH;
             double hitboxBottom = student.getY() + STUDENT_HITBOX_OFFSET_Y;
             double hitboxTop = hitboxBottom + STUDENT_HITBOX_HEIGHT;
             boolean touchingCentralHall = student.getX() >= 580
                 || (hitboxRight >= 520 && hitboxTop >= 200 && hitboxBottom <= 301);
-            if (touchingCentralHall) {
-                if (centralHallUnlocked) {
-                    escapeObjective.complete();
-                    countdownTimer.setRunState(RunState.ESCAPED);
-                    scoreSystem.addEscapeBonus(countdownTimer.getRemaining());
-                    scoreSystem.addTimeBonus(countdownTimer.getRemaining());
-                    student.setScore(scoreSystem.getScore());
-                    playDuckQuack();
-                    showNotification("ESCAPED! Reached Central Hall on time! (+" + scoreSystem.getScore() + " pts)");
-                } else if (!wasTouchingLockedCentralHall) {
-                    int secondsLeft = CENTRAL_HALL_UNLOCK_SECONDS - elapsedSeconds;
-                    showNotification("Central Hall is locked! Survive " + secondsLeft + "s more to enter!");
-                }
+            if (touchingCentralHall && !wasTouchingLockedCentralHall && !escapeObjective.isCompleted()) {
+                showNotification("Feed all three swarms before entering Central Hall!");
             }
-            wasTouchingLockedCentralHall = touchingCentralHall && !centralHallUnlocked;
+            wasTouchingLockedCentralHall = touchingCentralHall;
 
             // Check defeat conditions
             if (student.isDead()) {
@@ -441,6 +486,7 @@ public class Main extends Game {
             g.draw(batch);
         }
         student.draw(batch);
+        inventoryEffects.render(batch, student);
         batch.end();
 
         // 1c. Draw hunger bar above each living goose
@@ -459,7 +505,7 @@ public class Main extends Game {
         batch.begin();
         font.setColor(Color.WHITE);
         font.draw(batch, "Score: " + scoreSystem.getScore() + " [" + scoreSystem.getDifficulty().getName() + "]", 480, 460);
-        font.draw(batch, "Health: " + student.getHealth() + "/" + student.getMaxHealth(), 20, 475);
+        font.draw(batch, "Allergy Resistance: " + student.getHealth() + "/" + student.getMaxHealth(), 20, 475);
 
         // Draw Timer with WarningLevel coloring & high-contrast mode
         WarningLevel level = countdownTimer.getWarningLevel();
@@ -476,17 +522,22 @@ public class Main extends Game {
         }
         clockTimer.drawTime(batch, countdownTimer.getRemaining(),
             countdownTimer.getRunState().isRunning());
-        font.draw(batch, "Secrets: " + hiddenEventManager.getEventsInteracted() + "/2", 400, 475);
-
-        // Goal indicator
-        int elapsedSeconds = countdownTimer.getDuration() - countdownTimer.getRemaining();
-        if (elapsedSeconds < CENTRAL_HALL_UNLOCK_SECONDS) {
-            font.setColor(colorBlindMode ? Color.CYAN : Color.ORANGE);
-            font.draw(batch, "CENTRAL HALL (" + (CENTRAL_HALL_UNLOCK_SECONDS - elapsedSeconds) + "s)", 465, 240);
-        } else {
-            font.setColor(colorBlindMode ? Color.SKY : Color.LIME);
-            font.draw(batch, "CENTRAL HALL ->", 500, 240);
+        font.draw(batch, "Hidden Events: " + hiddenEventManager.getEventsInteracted() + "/2", 385, 475);
+        font.setColor(Color.WHITE);
+        font.draw(batch, "Items used: " + itemsUsed, 450, 393);
+        font.draw(batch, "Swarm: " + Math.min(currentSwarm, TOTAL_SWARMS) + "/3", 450, 413);
+        // Each bar belongs to a goose. Small labels avoid covering the map.
+        font.getData().setScale(0.65f);
+        for (Goose g : geese) {
+            if (!g.hasReturnedToLake()) {
+                font.draw(batch, "Hunger " + g.getHunger() + "%", (float) g.getX() - 6, (float) Math.min(477, g.getY() + g.getHeight() + 23));
+            }
         }
+        font.getData().setScale(1f);
+
+        // Goal indicator: feed all three swarms, then the student reaches the hall automatically.
+        font.setColor(colorBlindMode ? Color.SKY : Color.LIME);
+        font.draw(batch, "CENTRAL HALL ->", 500, 240);
 
         if (student.hasUmbrella()) {
             font.setColor(Color.CYAN);
@@ -531,7 +582,7 @@ public class Main extends Game {
             font.draw(batch, "TIME EXPIRED! You missed your lecture. Press 'R' to restart.", 110, 260);
         } else if (student.isDead()) {
             font.setColor(Color.RED);
-            font.draw(batch, "CAUGHT! The geese defeated you. Press 'R' to restart.", 140, 260);
+            font.draw(batch, "ALLERGIES! Resistance reached zero. Press R to restart.", 120, 260);
         } else if (countdownTimer.getRunState().isPaused()) {
             font.setColor(Color.GOLD);
             font.draw(batch, "=== PAUSE MENU ===", 250, 360);
@@ -548,6 +599,14 @@ public class Main extends Game {
             font.draw(batch, "Press 'P' to resume playing", 230, 125);
         }
 
+        if (swarmBannerTimer > 0f && !escapeObjective.isCompleted() && !student.isDead()) {
+            font.getData().setScale(2.0f);
+            font.setColor(Color.GOLD);
+            font.draw(batch, "FEED THE GEESE!!!", 115, 345);
+            font.getData().setScale(1f);
+            font.setColor(Color.WHITE);
+            font.draw(batch, "Swarm " + currentSwarm + "/3", 290, 305);
+        }
         batch.end();
     }
 
@@ -637,32 +696,38 @@ public class Main extends Game {
             }
         }
 
-        // Use selected item (SPACE key) with spam protection (Risk Assessment R21)
+        // Use selected item (SPACE) repeatedly while the game is running.
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
             if (!spamFilter.allowAction(gameTime)) return;
             Item selected = student.getInventory().getSelected();
-            if (selected != null && !selected.isUsedUp()) {
-                if (selected instanceof Bread && ((Bread) selected).isOnCooldown()) {
-                    int secs = (int) Math.ceil(((Bread) selected).getCooldownRemaining());
-                    showNotification("Bread is recharging! " + secs + "s left!");
-                    return;
-                }
-                if (selected instanceof DistractionItem) {
-                    showNotification("Threw Seeds! Goose is distracted for 5s!");
-                    playDuckQuack();
-                } else if (selected instanceof FeedItem) {
-                    showNotification("Fed Goose Bread! Goose is eating for 2s!");
-                    playDuckQuack();
-                } else if (selected instanceof FoundItem) {
-                    if (selected instanceof AllergyMedicationItem) {
-                        showNotification("Used Medication! Healed +50 HP!");
-                    } else {
-                        showNotification("Used " + selected.getName() + "!");
-                    }
-                }
+            if (selected == null || selected.isUsedUp()) {
+                showNotification("That slot is empty or the item has no uses left.");
+                return;
             }
-            student.useSelectedItem(geese);
+            if (selected instanceof Bread && ((Bread) selected).isOnCooldown()) {
+                showNotification("Breadcrumbs ready in "
+                    + Math.ceil(((Bread) selected).getCooldownRemaining() * 10) / 10.0 + "s");
+                return;
+            }
+            if (student.useSelectedItem(geese)) {
+                itemsUsed++;
+                inventoryEffects.trigger(selected, student);
+                if (selected instanceof Bread) {
+                    showNotification("Breadcrumbs thrown! Keep feeding to lower Hunger.");
+                    playDuckQuack();
+                } else if (selected instanceof DistractionItem) {
+                    showNotification("Seeds scattered! " + selected.getQuantity() + " uses left.");
+                    playDuckQuack();
+                } else if (selected instanceof AllergyMedicationItem) {
+                    showNotification("Medication used! Resistance doubled (max 20).");
+                } else if (selected instanceof UmbrellaItem) {
+                    showNotification("Umbrella open! Protected for 10 seconds.");
+                }
+            } else {
+                showNotification("Move nearer to the geese to use this item.");
+            }
         }
+
     }
 
     /**
@@ -677,7 +742,8 @@ public class Main extends Game {
             scoreSystem.setDifficulty(difficulty);
         }
         for (Goose g : geese) {
-            g.setSpeedMultiplier(difficulty.getGooseSpeedModifier().getMultiplier());
+            g.setSpeedMultiplier(difficulty.getGooseSpeedModifier().getMultiplier()
+                * (currentSwarm <= 1 ? 1.0 : 2.0));
         }
         showNotification("Difficulty set to: " + difficulty.getName().toUpperCase()
             + " (" + difficulty.getBaseMultiplier() + "x score, goose speed "
@@ -739,6 +805,8 @@ public class Main extends Game {
         }
 
         if (hiddenEventManager != null) hiddenEventManager.dispose();
+        if (inventoryUI != null) inventoryUI.dispose();
+        if (inventoryEffects != null) inventoryEffects.dispose();
         if (campusMap != null) campusMap.dispose();
         if (backgroundMusic != null) backgroundMusic.dispose();
         if (gooseHonkMusic != null) gooseHonkMusic.dispose();

@@ -12,6 +12,8 @@ import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import java.util.ArrayList;
+import java.util.List;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
 public class CampusMap {
@@ -164,6 +166,21 @@ public class CampusMap {
         }
 
         return true;
+    }
+
+    /** Centres of the actual lake collision rectangles drawn in Tiled, in world pixels. */
+    public List<Vector2> getLakeCenters() {
+        List<Vector2> lakes = new ArrayList<>();
+        MapLayer collisions = map.getLayers().get("Collision");
+        if (collisions == null) return lakes;
+        for (MapObject object : collisions.getObjects()) {
+            if (object.getName() != null && object.getName().toLowerCase().startsWith("lake")
+                && object instanceof RectangleMapObject) {
+                Rectangle r = ((RectangleMapObject) object).getRectangle();
+                lakes.add(new Vector2(r.x + r.width / 2f, r.y + r.height / 2f));
+            }
+        }
+        return lakes;
     }
 
     public void resize(int width, int height) {

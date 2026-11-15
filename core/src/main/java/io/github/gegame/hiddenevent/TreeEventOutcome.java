@@ -5,16 +5,14 @@ import io.github.gegame.inventory.Inventory;
 
 /**
  * Outcome triggered by interacting with the tree outside Central Hall.
- * Reveals Allergy Medication that heals the player by 50 health points.
+ * Reveals a one-use medication that doubles remaining allergy resistance.
  */
 public class TreeEventOutcome extends EventOutcome {
 
-    public static final int HEAL_AMOUNT = AllergyMedicationItem.HEAL_AMOUNT;
-
     public TreeEventOutcome() {
         super(
-            "Reveals Medication (Heals 50 health)",
-            "You investigated the tree and found Medication! Use it to heal 50 HP.",
+            "Reveals medication (doubles remaining resistance)",
+            "Medication found! Press Space to double remaining resistance (max 20).",
             150
         );
         setRevealedItem(new AllergyMedicationItem());
