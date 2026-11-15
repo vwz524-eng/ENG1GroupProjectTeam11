@@ -1,10 +1,11 @@
 package io.github.gegame.hiddenevent;
 
-/**
- * Hidden event for the tree outside Central Hall.
- * Interacting with the tree reveals allergy medication that doubles the player's
- * remaining health points, without exceeding the original maximum of 20.
+/*
+Hidden event for tree outside Central Hall
+Interacting with tree reveals allergy medication that doubles the player's
+remaining health points, without exceeding original maximum of 20
  */
+
 public class TreeAllergyMedEvent extends HiddenEvent {
 
     public TreeAllergyMedEvent(double x, double y) {

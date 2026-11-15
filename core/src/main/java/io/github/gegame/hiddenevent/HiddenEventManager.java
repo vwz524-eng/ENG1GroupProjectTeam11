@@ -161,7 +161,7 @@ public class HiddenEventManager {
     Fallback rendered when asset textures are unavailable
     @param shapeRendered the Shaperenderer to draw with
      */
-    
+
     public void draw(ShapeRenderer shapeRenderer) {
         if (shapeRenderer == null) return;
         ensureTexturesLoaded();
