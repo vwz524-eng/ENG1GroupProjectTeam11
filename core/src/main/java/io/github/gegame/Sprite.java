@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
+
 import io.github.gegame.animation.AnimState;
 import io.github.gegame.animation.Direction;
 import io.github.gegame.animation.SpriteAnimator;
@@ -15,9 +16,9 @@ public abstract class Sprite {
     protected int width, height;
     protected Texture texture;
 
-    // animation support, remains null for sprites that don't call/use initAnimator()
+    // animation support, remains null for sprites that don't call initAnimator()
     protected SpriteAnimator animator;
-    // which way the sprite faces, subclasses update this as they move
+    // which way the sprite faces, default is DOWN
     protected Direction facing = Direction.DOWN;
 
     public Sprite(double x, double y, int width, int height) {
@@ -31,7 +32,7 @@ public abstract class Sprite {
      * Loads a libGDX texture from internal assets if available.
      * Safe to call in headless test environments.
      *
-     * @param path path relative to assets folder
+     * @param path path to assets folder
      */
     protected void loadImage(String path) {
         try {
@@ -45,13 +46,9 @@ public abstract class Sprite {
 
     /**
      * Turns on directional sprite-sheet animation for this entity.
-     * Call from the subclass constructor, then chain register(...) for each state:
-     * <pre>
-     *   initAnimator("geese", "goose")
-     *       .register(State.IDLE, SpriteAnimator.AUTO, 0.2f, true);
-     * </pre>
+     * Call from the subclass constructor, then chain together register() for each state
      *
-     * @param folder folder inside assets/ (e.g. "geese")
+     * @param folder folder/folder(s) contained assets
      * @param prefix start of every filename in that folder (e.g. "goose")
      */
     protected SpriteAnimator initAnimator(String folder, String prefix) {
@@ -60,8 +57,7 @@ public abstract class Sprite {
     }
 
     /**
-     * Picks the animation for the given state (using the current {@link #facing})
-     * and advances it. Call once per update.
+     * Picks the animation for the given state and advances it, this is called x1 for every uopdate
      */
     protected void updateAnimation(AnimState state, double dt) {
         if (animator == null) return;
@@ -70,9 +66,9 @@ public abstract class Sprite {
     }
 
     /**
-     * Draws the current animation frame if there is one, otherwise the static texture.
+     * Draws the current animation frame if there is one, otherwise the single texture
      *
-     * @param batch the active SpriteBatch
+     * @param batch the SpriteBatch
      */
     public void draw(SpriteBatch batch) {
         if (batch == null) return;
@@ -86,7 +82,7 @@ public abstract class Sprite {
     }
 
     /**
-     * Draws the sprite shape using ShapeRenderer (fallback or debug).
+     * Draws the sprite shape using ShapeRenderer - fallback/debug
      *
      * @param shapeRenderer the active ShapeRenderer
      */
@@ -139,6 +135,7 @@ public abstract class Sprite {
     public Direction getFacing() { return facing; }
 
     /** True if there is anything to draw with the SpriteBatch (static texture or loaded animations). */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted") // Warning supressed for now, can call the function something different for readability in the future
     public boolean hasTexture() {
         return texture != null || (animator != null && animator.hasFrames());
     }

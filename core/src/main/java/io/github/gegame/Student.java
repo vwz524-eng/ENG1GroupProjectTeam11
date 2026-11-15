@@ -1,8 +1,11 @@
 package io.github.gegame;
 
+import java.util.List;
+
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+
 import io.github.gegame.animation.AnimState;
 import io.github.gegame.animation.Direction;
 import io.github.gegame.animation.SpriteAnimator;
@@ -10,20 +13,17 @@ import io.github.gegame.inventory.Bread;
 import io.github.gegame.inventory.DistractionItem;
 import io.github.gegame.inventory.FeedItem;
 import io.github.gegame.inventory.InitialInventory;
-import io.github.gegame.inventory.Inventory;
 import io.github.gegame.inventory.Item;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Student extends Player {
 
     /**
-     * Animation states. The token is the part of the filename between "student" and the direction.
+     * Animation states. The token is the part of the filename between "student" and the direction
      */
     public enum State implements AnimState {
-        IDLE(""),        // characters/student_<dir>.png
-        WALK("walk"),    // characters/student_walk_<dir>.png
-        THROW("throw");  // characters/student_throw_<dir>.png
+        IDLE(""), // characters/student_<dir>.png
+        WALK("walk"), // characters/student_walk_<dir>.png
+        THROW("throw"); // characters/student_throw_<dir>.png
 
         private final String token;
 
@@ -41,8 +41,8 @@ public class Student extends Player {
     private static final double THROW_SECONDS = 0.35; // how long the throw pose is held
 
     private double umbrellaTimer = 0; // seconds of umbrella protection left once activated
-    private double hitCooldown = 0;   // seconds until the goose can hurt us again
-    private double throwTimer = 0;    // seconds left of the throw animation
+    private double hitCooldown = 0; // seconds until the goose can hurt us again
+    private double throwTimer = 0; // seconds left of the throw animation
     private boolean movedThisFrame = false;
 
     public Student(double x, double y) {
@@ -172,16 +172,19 @@ public class Student extends Player {
             }
         }
 
-        // Pick the animation: throw beats walk beats idle.
+        // Pick the animation: throw has priority over walk, walk beats idle, this can be scaled later for more actions
         facing = Direction.fromVector(facingX, facingY, facing);
         State state = throwTimer > 0 ? State.THROW
             : movedThisFrame ? State.WALK
             : State.IDLE;
-        movedThisFrame = false; // move*() sets it again next frame if a key is still held
+        movedThisFrame = false; // move*() sets it again next frame if a key is still being held down
         updateAnimation(state, dt);
     }
 
-    /** Textured drawing. Tints replace the old colour changes for umbrella / just-hit feedback. */
+    /** Textured drawing.
+     *  We used tints to replace the old colour changes for umbrella / newly hit feedback on the entity
+     * Guard if statement for if the sprite isn't rendered (null) just returns
+     */
     @Override
     public void draw(SpriteBatch batch) {
         if (batch == null) return;
@@ -195,7 +198,8 @@ public class Student extends Player {
         batch.setColor(Color.WHITE);
     }
 
-    /** Fallback box, only used when no textures loaded. */
+    /** Fallback box, only used when no textures loaded, 
+     * this prevents unexpected crashes/errors */
     @Override
     public void draw(ShapeRenderer shapeRenderer) {
         if (hasUmbrella()) {
@@ -250,17 +254,7 @@ public class Student extends Player {
     public double getHealthPercent() { return (double) health / MAX_HEALTH; } // for the health bar
     @Override
     public void setHealth(int health) { this.health = Math.max(0, Math.min(MAX_HEALTH, health)); }
-    @Override
-    public boolean isDead() { return health <= 0; }
 
     public double getUmbrellaTimeLeft() { return umbrellaTimer; }
     public double getSpeed() { return SPEED; }
-    public void setPosition(double x, double y) { this.x = x; this.y = y; }
-
-    @Override
-    public Inventory getInventory() { return inventory; }
-    @Override
-    public double getFacingX() { return facingX; }
-    @Override
-    public double getFacingY() { return facingY; }
 }

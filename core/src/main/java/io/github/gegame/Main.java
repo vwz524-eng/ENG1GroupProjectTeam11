@@ -1,6 +1,9 @@
 package io.github.gegame;
 
-import io.github.gegame.ClockTimer;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -12,21 +15,36 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import java.util.Iterator;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.Timer;
-import io.github.gegame.escape.*;
-import io.github.gegame.hiddenevent.*;
-import io.github.gegame.interaction.ActionSpamFilter;
-import io.github.gegame.inventory.*;
-import io.github.gegame.runlifecycle.Intro_screen;
-import io.github.gegame.score.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import io.github.gegame.escape.CountdownTimer;
+import io.github.gegame.escape.EscapeObjective;
+import io.github.gegame.escape.RunState;
+import io.github.gegame.escape.WarningLevel;
+import io.github.gegame.hiddenevent.AllergyMedicationItem;
+import io.github.gegame.hiddenevent.DiscoveryListener;
+import io.github.gegame.hiddenevent.EventOutcome;
+import io.github.gegame.hiddenevent.HiddenEvent;
+import io.github.gegame.hiddenevent.HiddenEventManager;
+import io.github.gegame.hiddenevent.LongBoiStatueEvent;
+import io.github.gegame.hiddenevent.TreeAllergyMedEvent;
+import io.github.gegame.hiddenevent.UmbrellaItem;
+import io.github.gegame.interaction.ActionSpamFilter;
+import io.github.gegame.inventory.Bread;
+import io.github.gegame.inventory.DistractionItem;
+import io.github.gegame.inventory.FeedItem;
+import io.github.gegame.inventory.FoundItem;
+import io.github.gegame.inventory.InventoryListener;
+import io.github.gegame.inventory.InventoryUI;
+import io.github.gegame.inventory.Item;
+import io.github.gegame.inventory.ItemPickup;
+import io.github.gegame.runlifecycle.Intro_screen;
+import io.github.gegame.score.DifficultyLevel;
+import io.github.gegame.score.ScoreSystem;
 
 /**
- * Main game loop demonstrating Student, Goose, ItemPickups, Inventory, and Timed Escape.
+ * Main game loop
  */
 public class Main extends Game {
     private SpriteBatch batch;
@@ -70,13 +88,12 @@ public class Main extends Game {
     private static final float STUDENT_HITBOX_OFFSET_Y = 6f;
     private static final float STUDENT_HITBOX_WIDTH = 24f;
     private static final float STUDENT_HITBOX_HEIGHT = 20f;
-    private static final int CENTRAL_HALL_UNLOCK_SECONDS = 60;
     private boolean wasTouchingLockedCentralHall = false;
 
     private String notificationMessage = "Welcome! WASD to move, 1-5 to select, SPACE to use items";
     private Timer.Task clearNotificationTask;
 
-    // Audio assets
+    // Audio assets, could add menu option to modify these (remove final)?
     private static final float MUSIC_VOLUME = 0.25f;
     private static final float GOOSE_HONK_VOLUME = 0.25f;
     private static final float DUCK_QUACK_VOLUME = 1.0f;
@@ -84,6 +101,7 @@ public class Main extends Game {
     private Music gooseHonkMusic;
     private Sound duckQuackSound;
 
+    // Setup.
     @Override
     public void create() {
         batch = new SpriteBatch();
@@ -124,14 +142,22 @@ public class Main extends Game {
         }
     }
 
+    
+    // Geese not ducks, we had a debate about how geese honk instead of quack but decided it wasn't worth changing
     private void playDuckQuack() {
         if (duckQuackSound != null) {
             duckQuackSound.play(DUCK_QUACK_VOLUME);
         }
     }
 
+    // ---
+    // Intro screen/gameplay state managers
+    // ---
+    // does this using Gdx's glViewports
+    // --
+    
     /**
-     * Starts or restarts active gameplay from a menu or end screen.
+     * Starts or restarts the (active) gameplay loop from the menu or the end screen
      */
     public void startGameplay() {
         resetGame();
@@ -155,7 +181,7 @@ public class Main extends Game {
     }
 
     /**
-     * Resets the game state and returns to the intro screen.
+     * Resets the game state and returns to the intro screen
      */
     public void returnToIntroScreen() {
         resetGame();
@@ -164,7 +190,7 @@ public class Main extends Game {
     }
 
     private void resetGame() {
-        // Free the old entities' textures so restarting (R) doesn't leak GPU memory
+        // Need to free entities textures so there is no memory leak
         if (student != null) student.dispose();
         for (Goose g : geese) {
             g.dispose();
@@ -181,19 +207,18 @@ public class Main extends Game {
         student.setScore(0);
         wasTouchingLockedCentralHall = false;
 
-        // Initialize 5-minute timed escape countdown
+        // Initialize countdown
         countdownTimer = new CountdownTimer(300);
         countdownTimer.start();
         escapeObjective = new EscapeObjective(true);
 
         pickups.clear();
-        // SeedBag and Bread are in the starting inventory (InitialInventory);
-        // Umbrella is only obtained from the Long Boi hidden event.
+        // SeedBag and Bread are in InitialInventory
 
         if (inventoryUI != null) inventoryUI.dispose();
         inventoryUI = new InventoryUI(student.getInventory());
 
-        // Initialize Hidden Event Discovery aligned with campus.tmx Long Boi & Tree
+        // Initialize Hidden Event Discovery aligned with the campus.tmx Long Boi & Tree
         hiddenEventManager = new HiddenEventManager();
         hiddenEventManager.registerEvent(new LongBoiStatueEvent(240, 360));
         hiddenEventManager.registerEvent(new TreeAllergyMedEvent(408, 130));
@@ -216,7 +241,7 @@ public class Main extends Game {
             }
         });
 
-        // Demonstrate Observer pattern: Score listens to inventory events
+        // Score depends on the inventoryt events
         student.getInventory().addListener(new InventoryListener() {
             @Override
             public void onItemAdded(Item item) {
@@ -243,7 +268,6 @@ public class Main extends Game {
         showNotification("Survive all 3 swarms (before the 5-minute timer expires)!");
     }
 
-    /** Difficulty determines initial numbers; each next swarm doubles them. */
     private void spawnSwarm(int swarmNumber) {
         currentSwarm = swarmNumber;
         swarmBannerTimer = 3f; // Giant FEED THE GEESE!!! prompt
@@ -281,7 +305,6 @@ public class Main extends Game {
         return 1;
     }
 
-    /** When all geese in the current swarm have gone back to lakes, continue or win. */
     private void updateSwarmProgress() {
         Iterator<Goose> iterator = geese.iterator();
         while (iterator.hasNext()) {
@@ -305,10 +328,6 @@ public class Main extends Game {
         }
     }
 
-    /**
-     * Resolves solid collision between geese so multiple geese do not stack on top of each other,
-     * while leaving student-goose movement unobstructed.
-     */
     private void resolveGooseCollisions() {
         final double minSeparation = 30.0;
         for (int pass = 0; pass < 2; pass++) {
@@ -401,8 +420,7 @@ public class Main extends Game {
             }
             updateSwarmProgress();
 
-            // The goal unlocks automatically once the third swarm has returned to its lakes.
-            // Reaching the hall early is not an instant victory.
+            // The goal unlocks automatically once the final swarm is finished
             double hitboxRight = student.getX() + STUDENT_HITBOX_OFFSET_X + STUDENT_HITBOX_WIDTH;
             double hitboxBottom = student.getY() + STUDENT_HITBOX_OFFSET_Y;
             double hitboxTop = hitboxBottom + STUDENT_HITBOX_HEIGHT;
@@ -422,23 +440,22 @@ public class Main extends Game {
                 playDuckQuack();
             }
 
-            // Update pickups (check if player contacts them)
+            // Update pickups
             for (ItemPickup pickup : pickups) {
                 pickup.update(student);
             }
         }
 
-        // Clear screen (dark background)
+        // Clear screen
         ScreenUtils.clear(0.1f, 0.12f, 0.15f, 1f);
 
-        // Display the campus map
         campusMap.render();
 
 
-        // 1. Draw entities using ShapeRenderer
+        // Draw entities
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
-        // Draw Hidden Events fallback (only used if textures couldn't be loaded)
+        //fallback for drawing hidden events
         hiddenEventManager.draw(shapeRenderer);
 
         // Draw pickups
@@ -461,7 +478,7 @@ public class Main extends Game {
         }
         if (!student.hasTexture()) student.draw(shapeRenderer);
 
-        // Draw Health Bar (Colourblind accessible)
+        // Draw hp to be colourblind accessible)
         shapeRenderer.setColor(0.3f, 0.3f, 0.3f, 1f);
         shapeRenderer.rect(20, 440, 150, 16);
         if (colorBlindMode) {
@@ -471,7 +488,6 @@ public class Main extends Game {
         }
         shapeRenderer.rect(20, 440, (float) (150 * student.getHealthPercent()), 16);
 
-        // Pause Menu Backdrop (QR_PAUSE_MENU < 0.5s activation)
         if (countdownTimer.getRunState().isPaused()) {
             shapeRenderer.setColor(0.05f, 0.08f, 0.12f, 0.92f);
             shapeRenderer.rect(130, 90, 380, 300);
@@ -479,7 +495,7 @@ public class Main extends Game {
 
         shapeRenderer.end();
 
-        // 1b. Draw world textures and animated sprites (goose first so the student renders on top)
+        // Draw (goose first so the student renders on top)
         batch.begin();
         hiddenEventManager.draw(batch);
         for (Goose g : geese) {
@@ -489,7 +505,7 @@ public class Main extends Game {
         inventoryEffects.render(batch, student);
         batch.end();
 
-        // 1c. Draw hunger bar above each living goose
+        // hunger bar
         if (!countdownTimer.getRunState().isPaused()) {
             shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
             for (Goose g : geese) {
@@ -498,10 +514,10 @@ public class Main extends Game {
             shapeRenderer.end();
         }
 
-        // 2. Draw Inventory HUD
+        // Inventory
         inventoryUI.render(shapeRenderer, batch, font);
 
-        // 3. Draw HUD Text (Controls, Score, Timer, Status)
+        // the Text for the HUD (Controls, Score, Timer, Status)
         batch.begin();
         font.setColor(Color.WHITE);
         font.draw(batch, "Score: " + scoreSystem.getScore() + " [" + scoreSystem.getDifficulty().getName() + "]", 480, 460);
@@ -511,22 +527,21 @@ public class Main extends Game {
         WarningLevel level = countdownTimer.getWarningLevel();
         if (colorBlindMode) {
             font.setColor(level == WarningLevel.CRITICAL ? Color.MAGENTA : (level == WarningLevel.WARNING ? Color.CYAN : Color.SKY));
-        } else {
-            if (level == WarningLevel.CRITICAL) {
-                font.setColor(Color.RED);
-            } else if (level == WarningLevel.WARNING) {
-                font.setColor(Color.YELLOW);
-            } else {
-                font.setColor(Color.GREEN);
+        }
+         else {
+            switch (level) {
+                case CRITICAL -> font.setColor(Color.RED);
+                case WARNING -> font.setColor(Color.YELLOW);
+                default -> font.setColor(Color.GREEN);
             }
         }
-        clockTimer.drawTime(batch, countdownTimer.getRemaining(),
-            countdownTimer.getRunState().isRunning());
+        clockTimer.drawTime(batch, countdownTimer.getRemaining(), countdownTimer.getRunState().isRunning());
         font.draw(batch, "Hidden Events: " + hiddenEventManager.getEventsInteracted() + "/2", 385, 475);
         font.setColor(Color.WHITE);
         font.draw(batch, "Items used: " + itemsUsed, 450, 393);
         font.draw(batch, "Swarm: " + Math.min(currentSwarm, TOTAL_SWARMS) + "/3", 450, 413);
-        // Each bar belongs to a goose. Small labels avoid covering the map.
+        
+        // scales for geesebar
         font.getData().setScale(0.65f);
         for (Goose g : geese) {
             if (!g.hasReturnedToLake()) {
@@ -535,7 +550,7 @@ public class Main extends Game {
         }
         font.getData().setScale(1f);
 
-        // Goal indicator: feed all three swarms, then the student reaches the hall automatically.
+        // Draw the line for the obj - central hall
         font.setColor(colorBlindMode ? Color.SKY : Color.LIME);
         font.draw(batch, "CENTRAL HALL ->", 500, 240);
 
@@ -558,13 +573,12 @@ public class Main extends Game {
             font.draw(batch, "Goose Eating!", 500, 430);
         }
 
-        // Hidden event interaction prompt
+        // interaction prompt
         if (nearbyEvent != null && !nearbyEvent.isCompleted()) {
             font.setColor(Color.GOLD);
             font.draw(batch, "[E] " + nearbyEvent.getInteractionPrompt(), (float) nearbyEvent.getX() - 30, (float) nearbyEvent.getY() + 45);
         }
 
-        // Notification banner
         if (notificationMessage != null) {
             font.setColor(Color.GOLD);
             font.draw(batch, notificationMessage, 140, 395);
@@ -573,7 +587,7 @@ public class Main extends Game {
         font.setColor(Color.LIGHT_GRAY);
         font.draw(batch, "WASD: Move | 1-5: Slot | SPACE: Use | E: Interact | P: Pause | R: Reset", 10, 415);
 
-        // Terminal State Messages & Pause Menu
+        // statemessages and pause menu
         if (escapeObjective.isCompleted()) {
             font.setColor(Color.GREEN);
             font.draw(batch, "ESCAPED! You reached Central Hall in time! Press 'R' to play again.", 100, 260);
@@ -676,7 +690,7 @@ public class Main extends Game {
             student.setPosition(resolvedX, prevY);
         }
 
-        // Slot selection keys (1 to 5)
+        // Slot selection keys (1-5)
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) student.getInventory().setSelectedIndex(0);
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) student.getInventory().setSelectedIndex(1);
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_3)) student.getInventory().setSelectedIndex(2);
@@ -755,7 +769,7 @@ public class Main extends Game {
     }
 
     /**
-     * Cycles through difficulty levels: Easy -> Normal -> Hard -> Easy.
+     * Cycles through difficulty levels
      */
     public void cycleDifficulty() {
         DifficultyLevel current = selectedDifficulty != null ? selectedDifficulty : scoreSystem.getDifficulty();
@@ -811,5 +825,9 @@ public class Main extends Game {
         if (backgroundMusic != null) backgroundMusic.dispose();
         if (gooseHonkMusic != null) gooseHonkMusic.dispose();
         if (duckQuackSound != null) duckQuackSound.dispose();
+    }
+
+    public List<ItemPickup> getPickups() {
+        return pickups;
     }
 }
