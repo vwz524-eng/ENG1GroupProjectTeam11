@@ -1,8 +1,6 @@
 package io.github.gegame.score;
 
-/**
- * Modifies timer duration or speed according to difficulty level.
- */
+// Modifies the duration of the time based on difficulty/speed
 public class TimerModifier {
     private float multiplier;
 
@@ -23,7 +21,7 @@ public class TimerModifier {
     }
 
     public void setMultiplier(float multiplier) {
-        this.multiplier = multiplier > 0 ? multiplier : 1.0f;
+        this.multiplier = multiplier > 0 ? multiplier : 1f;
     }
 }
 

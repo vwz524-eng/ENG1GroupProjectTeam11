@@ -1,9 +1,5 @@
 package io.github.gegame.score;
 
-/**
- * Represents a game difficulty setting, managing base score multipliers
- * and specialized modifiers for timers, goose speeds, and event frequency.
- */
 public class DifficultyLevel {
     private String name;
     private float baseMultiplier;
@@ -32,7 +28,7 @@ public class DifficultyLevel {
         new EventFrequencyModifier(0.8f)
     );
 
-    public DifficultyLevel(String name, float baseMultiplier, TimerModifier timerModifier,
+    public DifficultyLevel(String name, float baseMultiplier, TimerModifier timerModifier, 
                            GooseSpeedModifier gooseSpeedModifier, EventFrequencyModifier eventFrequencyModifier) {
         this.name = name != null ? name : "Normal";
         this.baseMultiplier = baseMultiplier > 0 ? baseMultiplier : 1.0f;

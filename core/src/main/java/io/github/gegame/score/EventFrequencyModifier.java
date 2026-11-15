@@ -1,7 +1,7 @@
 package io.github.gegame.score;
 
 /**
- * Modifies the frequency or probability of game events according to difficulty level.
+ * Allows for the modification of hidden events based on difficulty
  */
 public class EventFrequencyModifier {
     private float multiplier;

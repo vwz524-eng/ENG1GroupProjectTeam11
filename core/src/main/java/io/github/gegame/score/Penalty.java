@@ -1,8 +1,5 @@
 package io.github.gegame.score;
 
-/**
- * Deducts points upon penalties such as goose collisions or expired objectives.
- */
 public class Penalty {
     private int pointsLost;
 
@@ -15,9 +12,9 @@ public class Penalty {
     }
 
     /**
-     * Calculates the points lost for a given penalty reason.
+     * Calculates the points lost
      *
-     * @param reason description of why penalty is applied
+     * @param reason reason for deduction
      * @return points to deduct
      */
     public int apply(String reason) {

@@ -1,9 +1,5 @@
 package io.github.gegame.score;
 
-/**
- * Awards bonus points when the student successfully reaches Central Hall
- * before the 5-minute countdown timer expires.
- */
 public class EscapeBonus {
     private int points;
 
@@ -18,8 +14,8 @@ public class EscapeBonus {
     /**
      * Awards escape points, optionally combining base bonus with remaining time speed bonus.
      *
-     * @param escapeTime remaining seconds upon escape
-     * @return total points awarded
+     * @param escapeTime remaining time when escaped
+     * @return points awarded
      */
     public int award(int escapeTime) {
         int speedBonus = Math.max(0, escapeTime);

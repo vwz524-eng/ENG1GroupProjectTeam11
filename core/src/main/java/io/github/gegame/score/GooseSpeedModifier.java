@@ -1,7 +1,7 @@
 package io.github.gegame.score;
 
 /**
- * Modifies goose movement speed according to difficulty level and swarm tier.
+ * Changes goose speed according to difficulty  
  */
 public class GooseSpeedModifier {
     private float multiplier;
