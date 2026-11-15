@@ -4,11 +4,11 @@ import io.github.gegame.Player;
 import io.github.gegame.Student;
 import io.github.gegame.inventory.FoundItem;
 
-/**
- * Umbrella item unlocked by rubbing the Long Boi statue's beak.
- * Follows the Long Boi Statue Umbrella State Diagram:
- * Hidden -> Available (3 uses) -> Protected (10s) -> Exhausted.
+/*
+Umbrella item unlocked by interacting with Long Boi statue's beak
+Follows the LongBoi statue umbrella state diagram
  */
+
 public class UmbrellaItem extends FoundItem {
 
     public enum UmbrellaState {
