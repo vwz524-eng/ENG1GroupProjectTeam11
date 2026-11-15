@@ -9,20 +9,20 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+
 import io.github.gegame.Main;
 
 /**
- * Pause screen as defined in the Game Class Diagram.
- * Extends Retry and implements LibGDX Screen.
+ * Pause screen
  */
 public class Pause_screen extends Retry implements Screen {
     private String street;
     private String city;
 
-    private SpriteBatch batch;
-    private BitmapFont font;
-    private FitViewport viewport;
-    private Screen previousScreen;
+    private final SpriteBatch batch;
+    private final BitmapFont font;
+    private final FitViewport viewport;
+    private final Screen previousScreen;
 
     public Pause_screen() {
         this(null);
@@ -72,14 +72,10 @@ public class Pause_screen extends Retry implements Screen {
     }
 
     @Override
-    public void Restart_Score() {
-        // Reset score on restart
-    }
+    public void Restart_Score() {}
 
     @Override
-    public void Reset_Level() {
-        // Reset level on restart
-    }
+    public void Reset_Level() {}
 
     @Override
     public void render(float delta) {
@@ -90,7 +86,7 @@ public class Pause_screen extends Retry implements Screen {
 
         batch.begin();
         font.setColor(Color.GOLD);
-        font.draw(batch, "=== GAME PAUSED ===", 320, 360);
+        font.draw(batch, "--- GAME PAUSED ---", 320, 360);
 
         font.setColor(Color.WHITE);
         font.draw(batch, "Location: " + street + ", " + city, 300, 300);

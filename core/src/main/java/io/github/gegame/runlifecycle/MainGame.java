@@ -19,9 +19,9 @@ public class MainGame implements Screen {
     private Integer level;
     private Integer lives;
 
-    private SpriteBatch batch;
-    private BitmapFont font;
-    private FitViewport viewport;
+    private final SpriteBatch batch;
+    private final BitmapFont font;
+    private final FitViewport viewport;
 
     public MainGame() {
         this.score = 0;
@@ -123,8 +123,8 @@ public class MainGame implements Screen {
 
     @Override
     public void dispose() {
-        if (batch != null) batch.dispose();
-        if (font != null) font.dispose();
+        batch.dispose();
+        font.dispose();
     }
 }
 

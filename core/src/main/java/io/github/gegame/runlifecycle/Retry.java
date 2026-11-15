@@ -1,8 +1,7 @@
 package io.github.gegame.runlifecycle;
 
 /**
- * Abstract class representing retry, restart, and reset lifecycle capabilities
- * as defined in the Game Run Lifecycle class diagram.
+ * Abstract class for retry, restart, and reset lifecycle
  */
 public abstract class Retry {
     public abstract void Restart_game();

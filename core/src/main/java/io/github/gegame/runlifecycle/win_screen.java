@@ -9,19 +9,19 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+
 import io.github.gegame.Main;
 
 /**
- * Win screen as defined in the Game Class Diagram.
- * Extends Retry and implements LibGDX Screen.
- */
+ * Win screen
+*/
 public class win_screen extends Retry implements Screen {
     private String title;
     private int Final_score;
 
-    private SpriteBatch batch;
-    private BitmapFont font;
-    private FitViewport viewport;
+    private final SpriteBatch batch;
+    private final BitmapFont font;
+    private final FitViewport viewport;
 
     public win_screen() {
         this(0);
@@ -68,9 +68,7 @@ public class win_screen extends Retry implements Screen {
     }
 
     @Override
-    public void Reset_Level() {
-        // Reset level progression
-    }
+    public void Reset_Level() {}
 
     @Override
     public void render(float delta) {

@@ -3,7 +3,7 @@ package io.github.gegame.runlifecycle;
 import com.badlogic.gdx.graphics.Texture;
 
 /**
- * Manages colourblind mode options and preview as defined in the Game Class Diagram.
+ * Manages colourblind mode options and preview as defined in the Game Class Diagram
  */
 public class Colour_blind_option {
     private Texture preview;
