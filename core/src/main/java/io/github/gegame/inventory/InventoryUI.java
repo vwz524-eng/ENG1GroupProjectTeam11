@@ -7,16 +7,17 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import io.github.gegame.hiddenevent.UmbrellaItem;
+import io.github.gegame.hiddenevent.AllergyMedicationItem;
 
+/**
+ * Renders the inventory HUD (hotbar slots, item labels, and active selection) on screen.
+ */
 public class InventoryUI {
-
     private final Inventory inventory;
-
-    private final Texture seedIcon;
-    private final Texture breadIcon;
-    private final Texture umbrellaIcon;
-    private final Texture medicineIcon;
-
+    private final Texture seedIcon, breadIcon, umbrellaIcon, medicineIcon;
+    private double seedCooldownRemaining = 0;
+    private double umbrellaTimeRemaining = 0;
     private float slotSize = 52f;
     private float slotSpacing = 8f;
     private float x = 150f;
@@ -24,189 +25,165 @@ public class InventoryUI {
 
     public InventoryUI(Inventory inventory) {
         this.inventory = inventory;
-
         seedIcon = load("inventory/birdseed.png");
         breadIcon = load("inventory/breadcrumbs.png");
         umbrellaIcon = load("inventory/umbrella.png");
         medicineIcon = load("inventory/allergy_medication.png");
     }
 
-    // Load an image if it exists
     private Texture load(String path) {
-        if (Gdx.files.internal(path).exists()) {
-            return new Texture(Gdx.files.internal(path));
-        }
-        Gdx.app.error("InventoryUI", "Missing image: " + path);
-        return null;
+        return Gdx.files.internal(path).exists() ? new Texture(Gdx.files.internal(path)) : null;
     }
 
-    // Match each item with its picture
+    public void setSeedCooldownRemaining(double seconds) {
+        seedCooldownRemaining = Math.max(0, seconds);
+    }
+
+    public void setUmbrellaTimeRemaining(double seconds) {
+        umbrellaTimeRemaining = Math.max(0, seconds);
+    }
+
+    public void dispose() {
+        for (Texture texture : new Texture[] {seedIcon, breadIcon, umbrellaIcon, medicineIcon}) {
+            if (texture != null) texture.dispose();
+        }
+    }
+
     private Texture iconFor(Item item) {
         if (item == null) return null;
-
         switch (item.getId()) {
-            case "seed_bag":
-                return seedIcon;
-            case "bread":
-                return breadIcon;
-            case "umbrella":
-                return umbrellaIcon;
-            case "allergy_medication":
-                return medicineIcon;
-            default:
-                return null;
+            case "seed_bag": return seedIcon;
+            case "bread": return breadIcon;
+            case "umbrella": return umbrellaIcon;
+            case "allergy_medication": return medicineIcon;
+            default: return null;
         }
     }
 
-    public void render(ShapeRenderer shapeRenderer,
-                       SpriteBatch batch,
-                       BitmapFont font) {
-
+    /**
+     * Renders the hotbar slots and contents.
+     *
+     * @param shapeRenderer renderer for slot boxes
+     * @param batch sprite batch for text rendering
+     * @param font font for slot numbers and item names
+     */
+    public void render(ShapeRenderer shapeRenderer, SpriteBatch batch, BitmapFont font) {
         if (inventory == null) return;
 
         int capacity = inventory.getCapacity();
         int selected = inventory.getSelectedIndex();
 
-        // Draw inventory slot backgrounds
+        // 1. Draw Slot Backgrounds
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-
         for (int i = 0; i < capacity; i++) {
             float slotX = x + i * (slotSize + slotSpacing);
-
             shapeRenderer.setColor(0.12f, 0.12f, 0.16f, 0.9f);
             shapeRenderer.rect(slotX, y, slotSize, slotSize);
         }
-
         shapeRenderer.end();
 
-        // Draw outlines and selected slot
+        // 2. Draw Slot Outlines with Selected Highlight
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-
         for (int i = 0; i < capacity; i++) {
             float slotX = x + i * (slotSize + slotSpacing);
-
             if (i == selected) {
                 shapeRenderer.setColor(Color.GOLD);
                 shapeRenderer.rect(slotX, y, slotSize, slotSize);
-                shapeRenderer.rect(
-                    slotX - 1, y - 1,
-                    slotSize + 2, slotSize + 2
-                );
+                shapeRenderer.rect(slotX - 1, y - 1, slotSize + 2, slotSize + 2);
             } else {
                 shapeRenderer.setColor(0.4f, 0.4f, 0.45f, 1f);
                 shapeRenderer.rect(slotX, y, slotSize, slotSize);
             }
         }
-
         shapeRenderer.end();
 
-        // Draw item pictures, names and slot numbers
+        // 3. Draw Text / Labels
         if (batch != null && font != null) {
             batch.begin();
-
             for (int i = 0; i < capacity; i++) {
                 float slotX = x + i * (slotSize + slotSpacing);
-
+                // Draw key number
                 font.setColor(Color.LIGHT_GRAY);
-                font.draw(
-                    batch,
-                    String.valueOf(i + 1),
-                    slotX + 4,
-                    y + slotSize - 4
-                );
+                font.draw(batch, String.valueOf(i + 1), slotX + 4, y + slotSize - 4);
 
                 Item item = inventory.getItem(i);
-
+                Texture icon = iconFor(item);
+                if (icon != null) {
+                    batch.setColor(Color.WHITE);
+                    batch.draw(icon, slotX + 26, y + 24, 24, 24);
+                }
                 if (item != null) {
-                    Texture icon = iconFor(item);
-
-                    if (icon != null) {
-                        batch.setColor(Color.WHITE);
-                        batch.draw(
-                            icon,
-                            slotX + 26,
-                            y + 24,
-                            24,
-                            24
-                        );
-                    }
-
-                    boolean breadCooldown =
-                        item instanceof Bread
-                            && ((Bread) item).isOnCooldown();
-
-                    font.setColor(
-                        breadCooldown ? Color.ORANGE : Color.WHITE
-                    );
-
+                    boolean breadCooldown = item instanceof Bread && ((Bread) item).isOnCooldown();
+                    font.setColor(breadCooldown ? Color.ORANGE : Color.WHITE);
                     String name = item.getName();
-
                     if (name.length() > 6) {
                         name = name.substring(0, 5) + ".";
                     }
-
                     font.draw(batch, name, slotX + 3, y + 17);
+                    // All items show either available uses or their remaining cooldown.
+                    String status = shortStatusFor(item);
+                    font.setColor(item.isUsedUp() ? Color.GRAY : Color.YELLOW);
+                    font.draw(batch, status, slotX + 3, y + 32);
 
-                    if (item.isUsedUp()) {
-                        font.setColor(Color.GRAY);
-                        font.draw(batch, "0", slotX + 34, y + 34);
-                    }
-
-                    if (breadCooldown) {
-                        int secs = (int) Math.ceil(
-                            ((Bread) item).getCooldownRemaining()
-                        );
-
-                        font.setColor(Color.YELLOW);
-                        font.draw(
-                            batch,
-                            secs + "s",
-                            slotX + 26,
-                            y + slotSize - 4
-                        );
-                    }
                 }
             }
 
-            // Selected item description above hotbar
+            // Draw selected item info above hotbar
             Item active = inventory.getSelected();
-
             if (active != null) {
                 font.setColor(Color.GOLD);
-
-                String statusSuffix = "";
-
-                if (active instanceof Bread
-                    && ((Bread) active).isOnCooldown()) {
-
-                    int secs = (int) Math.ceil(
-                        ((Bread) active).getCooldownRemaining()
-                    );
-
-                    statusSuffix = " (Cooldown: " + secs + "s)";
-                }
-
-                font.draw(
-                    batch,
-                    "[" + (selected + 1) + "] "
-                        + active.getName()
-                        + statusSuffix
-                        + " - " + active.getDescription(),
-                    x,
-                    y + slotSize + 22
-                );
+                String statusSuffix = " (" + statusFor(active) + ")";
+                font.draw(batch, "[" + (selected + 1) + "] " + active.getName() + statusSuffix + " - " + active.getDescription(), x, y + slotSize + 22);
             } else {
                 font.setColor(Color.GRAY);
-                font.draw(
-                    batch,
-                    "[" + (selected + 1) + "] Empty Slot",
-                    x,
-                    y + slotSize + 22
-                );
+                font.draw(batch, "[" + (selected + 1) + "] Empty Slot", x, y + slotSize + 22);
             }
-
             batch.end();
         }
+    }
+
+
+    private String shortStatusFor(Item item) {
+        if (item instanceof Bread) {
+            double remaining = ((Bread) item).getCooldownRemaining();
+            return remaining > 0 ? formatSeconds(remaining) : "INF";
+        }
+        if (item instanceof SeedBag || "seed_bag".equals(item.getId())) {
+            return seedCooldownRemaining > 0 ? formatSeconds(seedCooldownRemaining) : "INF";
+        }
+        if (item instanceof UmbrellaItem) {
+            return ((UmbrellaItem) item).getUsesRemaining() + "/3";
+        }
+        if (item instanceof AllergyMedicationItem || "allergy_medication".equals(item.getId())) {
+            return Math.max(0, item.getQuantity()) + "/1";
+        }
+        return item.isUsedUp() ? "0" : String.valueOf(item.getQuantity());
+    }
+
+    /** Text shown for each inventory item, including limited uses and cooldowns. */
+    private String statusFor(Item item) {
+        if (item instanceof Bread) {
+            double remaining = ((Bread) item).getCooldownRemaining();
+            return remaining > 0 ? formatSeconds(remaining) : "Unlimited";
+        }
+        if (item instanceof SeedBag || "seed_bag".equals(item.getId())) {
+            return seedCooldownRemaining > 0 ? formatSeconds(seedCooldownRemaining) : "Unlimited";
+        }
+        if (item instanceof UmbrellaItem) {
+            int remaining = ((UmbrellaItem) item).getUsesRemaining();
+            if (umbrellaTimeRemaining > 0) {
+                return remaining + "/3 " + formatSeconds(umbrellaTimeRemaining);
+            }
+            return remaining + "/3";
+        }
+        if (item instanceof AllergyMedicationItem || "allergy_medication".equals(item.getId())) {
+            return Math.max(0, item.getQuantity()) + "/1";
+        }
+        return item.isUsedUp() ? "Used" : String.valueOf(item.getQuantity());
+    }
+
+    private String formatSeconds(double seconds) {
+        return String.format(java.util.Locale.ROOT, "%.1fs", seconds);
     }
 
     public void setPosition(float x, float y) {
@@ -217,15 +194,5 @@ public class InventoryUI {
     public float getX() { return x; }
     public float getY() { return y; }
     public float getSlotSize() { return slotSize; }
-    public void setSlotSize(float slotSize) {
-        this.slotSize = slotSize;
-    }
-
-    // Free the images when no longer needed
-    public void dispose() {
-        if (seedIcon != null) seedIcon.dispose();
-        if (breadIcon != null) breadIcon.dispose();
-        if (umbrellaIcon != null) umbrellaIcon.dispose();
-        if (medicineIcon != null) medicineIcon.dispose();
-    }
+    public void setSlotSize(float slotSize) { this.slotSize = slotSize; }
 }
