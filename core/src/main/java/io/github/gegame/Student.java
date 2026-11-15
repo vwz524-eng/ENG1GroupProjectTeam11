@@ -120,22 +120,36 @@ public class Student extends Player {
         }
     }
 
+
     private Goose findNearestLivingGoose(List<Goose> geese) {
+
         if (geese == null || geese.isEmpty()) {
             return null;
         }
+
         Goose nearest = null;
         double bestDist = Double.MAX_VALUE;
+
+        // Student must be within 85 pixels of a goose
+        double feedingRange = 85.0;
+
         for (Goose g : geese) {
+
             if (g == null || !g.isAvailableForFeeding()) {
                 continue;
             }
-            double dist = Math.hypot(g.centerX() - centerX(), g.centerY() - centerY());
-            if (dist < bestDist) {
+
+            double dist = Math.hypot(
+                g.centerX() - centerX(),
+                g.centerY() - centerY()
+            );
+
+            if (dist <= feedingRange && dist < bestDist) {
                 bestDist = dist;
                 nearest = g;
             }
         }
+
         return nearest;
     }
 
