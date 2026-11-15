@@ -4,11 +4,8 @@ import io.github.gegame.Player;
 import io.github.gegame.inventory.Inventory;
 import io.github.gegame.inventory.Item;
 
-/**
- * Represents the outcome of activating a HiddenEvent.
- * Encapsulates the description, user message, score reward,
- * and effects applied to the Player and Inventory.
- */
+//Represents the outcome of activating HiddenEvent.
+
 public class EventOutcome {
     private String outcomeDescription;
     private String message;
@@ -30,12 +27,8 @@ public class EventOutcome {
         this(outcomeDescription, message, 100);
     }
 
-    /**
-     * Applies this outcome's effects to the player and inventory.
-     *
-     * @param player    the player receiving the event effects
-     * @param inventory the inventory receiving any revealed items
-     */
+    //Applies this outcome's effects to the player and inventory
+
     public void apply(Player player, Inventory inventory) {
         if (revealedItem != null && inventory != null) {
             inventory.addItem(revealedItem);

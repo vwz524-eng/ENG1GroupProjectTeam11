@@ -10,10 +10,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Manager that coordinates hidden event discovery, proximity triggers,
- * interaction executions, and tracks the hidden events counter (FR_HIDDEN_EVENTS).
+/*
+Manager that coordinates hidden event discovery, proximity triggers,
+interaction execution, and tracks the hidden events counter (FR_HIDDEN_EVENTS)
  */
+
 public class HiddenEventManager {
     private final List<HiddenEvent> events = new ArrayList<>();
     private final List<DiscoveryListener> listeners = new ArrayList<>();
@@ -26,22 +27,22 @@ public class HiddenEventManager {
     public HiddenEventManager() {
     }
 
-    /**
-     * Registers a hidden event in the manager.
-     */
+    //Registers a hidden event in manager
+
     public void registerEvent(HiddenEvent event) {
         if (event != null && !events.contains(event)) {
             events.add(event);
         }
     }
 
-    /**
-     * Checks if the player is within range of any hidden event.
-     * Marks the event as discovered and notifies listeners if newly found.
-     *
-     * @param player the player to check
-     * @return the nearest active hidden event in trigger range, or null
+    /*
+    Checks if player is within range of any hidden event.
+    Marks the event as discovered and notifies listeners if newly found
+
+    @param player the player to check
+    @return the nearest active hidden event in trigger range, or null
      */
+
     public HiddenEvent checkProximity(Player player) {
         if (player == null) {
             return null;
@@ -62,12 +63,12 @@ public class HiddenEventManager {
         return null;
     }
 
-    /**
-     * Triggers/activates the nearby hidden event with the player.
-     *
-     * @param player the player interacting
-     * @return the resulting EventOutcome, or null if no event is within range
+    /*
+    Triggers the nearby hidden event with player
+    @param player the player interacting
+    @return the resulting EventOutcome, or null if no event is within range
      */
+
     public EventOutcome interact(Player player) {
         HiddenEvent event = checkProximity(player);
         if (event != null && event.canActivate()) {
@@ -79,13 +80,13 @@ public class HiddenEventManager {
         return null;
     }
 
-    /**
-     * Directly activates a specific hidden event.
-     *
-     * @param event  the event to activate
-     * @param player the player interacting
-     * @return the outcome produced
+    /*
+    Directly activates a speficic hidden event.
+    @param event the event to activate
+    @param player the player interacting
+    @return the outcome produced
      */
+
     public EventOutcome activateEvent(HiddenEvent event, Player player) {
         if (event != null && event.canActivate() && player != null) {
             EventOutcome outcome = event.activate(player, player.getInventory());
@@ -131,11 +132,11 @@ public class HiddenEventManager {
         }
     }
 
-    /**
-     * Renders hidden event sprites (Long Boi statue and tree) using asset textures.
-     *
-     * @param batch the SpriteBatch to draw with
+    /*
+    Renders hidden event sprites using asset textures
+    @param batch the SpriteBatch to draw with
      */
+
     public void draw(SpriteBatch batch) {
         if (batch == null) return;
         ensureTexturesLoaded();
@@ -156,11 +157,11 @@ public class HiddenEventManager {
         }
     }
 
-    /**
-     * Fallback renderer when asset textures are unavailable.
-     *
-     * @param shapeRenderer the ShapeRenderer to draw with
+    /*
+    Fallback rendered when asset textures are unavailable
+    @param shapeRendered the Shaperenderer to draw with
      */
+    
     public void draw(ShapeRenderer shapeRenderer) {
         if (shapeRenderer == null) return;
         ensureTexturesLoaded();
