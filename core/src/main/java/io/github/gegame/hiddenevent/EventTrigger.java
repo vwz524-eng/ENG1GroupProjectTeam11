@@ -3,7 +3,7 @@ package io.github.gegame.hiddenevent;
 //Triggers a hidden event check based on timing thresholds
 
 public class EventTrigger {
-    private int timeThreshold;
+    private final int timeThreshold;
     private double elapsedTime;
 
     public EventTrigger(int timeThreshold) {
@@ -21,18 +21,6 @@ public class EventTrigger {
 
     public boolean check() {
         return elapsedTime >= timeThreshold;
-    }
-
-    public int getTimeThreshold() {
-        return timeThreshold;
-    }
-
-    public void setTimeThreshold(int timeThreshold) {
-        this.timeThreshold = timeThreshold;
-    }
-
-    public double getElapsedTime() {
-        return elapsedTime;
     }
 
     public void reset() {

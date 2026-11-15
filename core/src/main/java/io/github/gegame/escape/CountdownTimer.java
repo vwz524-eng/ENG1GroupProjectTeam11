@@ -3,20 +3,15 @@ package io.github.gegame.escape;
 //Manages countdown timer, tracks warning levels, and monitors run state.
 
 public class CountdownTimer {
-    public static final int DEFAULT_DURATION = 300; // 5 minutes in seconds
     public static final int WARNING_THRESHOLD = 120; // 2 minutes remaining
     public static final int CRITICAL_THRESHOLD = 30; // 30 seconds remaining
 
-    private int duration;
+    private final int duration;
     private int remaining;
     private WarningLevel warningLevel;
     private RunState runState;
 
     private float accumulatedDelta = 0f;
-
-    public CountdownTimer() {
-        this(DEFAULT_DURATION);
-    }
 
     public CountdownTimer(int duration) {
         this.duration = Math.max(1, duration);
@@ -27,7 +22,6 @@ public class CountdownTimer {
     }
 
     //Starts or resumes the countdown timer
-
     public void start() {
         if (!isExpired()) {
             this.runState = RunState.RUNNING;
@@ -103,10 +97,6 @@ public class CountdownTimer {
         return duration;
     }
 
-    public void setDuration(int duration) {
-        this.duration = Math.max(1, duration);
-    }
-
     public int getRemaining() {
         return remaining;
     }
@@ -118,10 +108,6 @@ public class CountdownTimer {
 
     public WarningLevel getWarningLevel() {
         return warningLevel;
-    }
-
-    public void setWarningLevel(WarningLevel warningLevel) {
-        this.warningLevel = warningLevel;
     }
 
     public RunState getRunState() {

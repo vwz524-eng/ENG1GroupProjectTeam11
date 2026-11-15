@@ -1,6 +1,5 @@
 package io.github.gegame;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -26,22 +25,6 @@ public abstract class Sprite {
         this.y = y;
         this.width = width;
         this.height = height;
-    }
-
-    /**
-     * Loads a libGDX texture from internal assets if available.
-     * Safe to call in headless test environments.
-     *
-     * @param path path to assets folder
-     */
-    protected void loadImage(String path) {
-        try {
-            if (Gdx.files != null && Gdx.files.internal(path).exists()) {
-                this.texture = new Texture(Gdx.files.internal(path));
-            }
-        } catch (Exception e) {
-            System.out.println("Could not load texture: " + path);
-        }
     }
 
     /**
@@ -107,10 +90,6 @@ public abstract class Sprite {
 
     public double centerY() {
         return y + height / 2.0;
-    }
-
-    public double distanceTo(Sprite other) {
-        return Math.hypot(centerX() - other.centerX(), centerY() - other.centerY());
     }
 
     public void dispose() {

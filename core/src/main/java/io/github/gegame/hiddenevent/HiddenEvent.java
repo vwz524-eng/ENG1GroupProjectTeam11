@@ -6,9 +6,9 @@ import io.github.gegame.inventory.Inventory;
 //Represents a hidden event in the game world that rewards exploration
 
 public class HiddenEvent {
-    private String eventId;
-    private String eventType;
-    private String interactionPrompt;
+    private final String eventId;
+    private final String eventType;
+    private final String interactionPrompt;
     private boolean isDiscovered;
     private boolean isCompleted;
 
@@ -16,11 +16,11 @@ public class HiddenEvent {
 
     private double x;
     private double y;
-    private double triggerRadius;
+    private final double triggerRadius;
 
     private EventOutcome outcome;
-    private EventTrigger trigger;
-    private DiscoveryCondition condition;
+    private final EventTrigger trigger;
+    private final DiscoveryCondition condition;
     private DiscoveryReward reward;
 
     public HiddenEvent(String eventId, String eventType, String interactionPrompt, double x, double y, double triggerRadius) {
@@ -37,14 +37,6 @@ public class HiddenEvent {
         this.reward = new DiscoveryReward();
     }
 
-    public HiddenEvent(String eventId, String interactionPrompt, double x, double y) {
-        this(eventId, "GENERIC", interactionPrompt, x, y, 60.0);
-    }
-
-    public HiddenEvent(String eventId, String interactionPrompt) {
-        this(eventId, "GENERIC", interactionPrompt, 0, 0, 60.0);
-    }
-
     //Marks the event as discovered when player discovers hidden area
 
     public void discover() {
@@ -57,7 +49,7 @@ public class HiddenEvent {
      */
 
     public boolean canActivate() {
-        return !isCompleted && (condition == null || condition.evaluate()) && (trigger == null || trigger.check());
+        return !isCompleted && condition.evaluate() && trigger.check();
     }
 
     /**
@@ -87,13 +79,7 @@ public class HiddenEvent {
     //Activates the event without parameters for basic lifecycle state
 
 
-    public void activate() {
-        if (canActivate()) {
-            resolve();
-        }
-    }
-
-    // Resovles event, making it completed so it cannot be triggered repeatedly
+    // Resolves event, making it completed so it cannot be triggered repeatedly
 
     public void resolve() {
         this.isCompleted = true;
@@ -125,40 +111,20 @@ public class HiddenEvent {
         return eventId;
     }
 
-    public void setEventId(String eventId) {
-        this.eventId = eventId;
-    }
-
     public String getEventType() {
         return eventType;
-    }
-
-    public void setEventType(String eventType) {
-        this.eventType = eventType;
     }
 
     public String getInteractionPrompt() {
         return interactionPrompt;
     }
 
-    public void setInteractionPrompt(String interactionPrompt) {
-        this.interactionPrompt = interactionPrompt;
-    }
-
     public boolean isDiscovered() {
         return isDiscovered;
     }
 
-    public void setDiscovered(boolean discovered) {
-        isDiscovered = discovered;
-    }
-
     public boolean isCompleted() {
         return isCompleted;
-    }
-
-    public void setCompleted(boolean completed) {
-        isCompleted = completed;
     }
 
     public double getX() {
@@ -177,40 +143,12 @@ public class HiddenEvent {
         this.y = y;
     }
 
-    public double getTriggerRadius() {
-        return triggerRadius;
-    }
-
-    public void setTriggerRadius(double triggerRadius) {
-        this.triggerRadius = triggerRadius;
-    }
-
     public EventOutcome getOutcome() {
         return outcome;
     }
 
     public void setOutcome(EventOutcome outcome) {
         this.outcome = outcome;
-    }
-
-    public EventTrigger getTrigger() {
-        return trigger;
-    }
-
-    public void setTrigger(EventTrigger trigger) {
-        this.trigger = trigger;
-    }
-
-    public DiscoveryCondition getCondition() {
-        return condition;
-    }
-
-    public void setCondition(DiscoveryCondition condition) {
-        this.condition = condition;
-    }
-
-    public DiscoveryReward getReward() {
-        return reward;
     }
 
     public void setReward(DiscoveryReward reward) {

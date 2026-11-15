@@ -16,8 +16,8 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
  */
 public class MainGame implements Screen {
     private Integer score;
-    private Integer level;
-    private Integer lives;
+    private final Integer level;
+    private final Integer lives;
 
     private final SpriteBatch batch;
     private final BitmapFont font;
@@ -93,22 +93,6 @@ public class MainGame implements Screen {
 
     public void setScore(Integer score) {
         this.score = score;
-    }
-
-    public Integer getLevel() {
-        return level;
-    }
-
-    public void setLevel(Integer level) {
-        this.level = level;
-    }
-
-    public Integer getLives() {
-        return lives;
-    }
-
-    public void setLives(Integer lives) {
-        this.lives = lives;
     }
 
     @Override

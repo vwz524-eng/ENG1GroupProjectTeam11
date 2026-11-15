@@ -6,9 +6,9 @@ import io.github.gegame.Player;
 //Evaluates required items, timing conditions, and discovery probability.
 
 public class DiscoveryCondition {
-    private boolean requireItem;
-    private boolean requiresTime;
-    private float probability;
+    private final boolean requireItem;
+    private final boolean requiresTime;
+    private final float probability;
 
     public DiscoveryCondition(boolean requireItem, boolean requiresTime, float probability) {
         this.requireItem = requireItem;
@@ -35,30 +35,6 @@ public class DiscoveryCondition {
             return false;
         }
         return evaluate();
-    }
-
-    public boolean isRequireItem() {
-        return requireItem;
-    }
-
-    public void setRequireItem(boolean requireItem) {
-        this.requireItem = requireItem;
-    }
-
-    public boolean isRequiresTime() {
-        return requiresTime;
-    }
-
-    public void setRequiresTime(boolean requiresTime) {
-        this.requiresTime = requiresTime;
-    }
-
-    public float getProbability() {
-        return probability;
-    }
-
-    public void setProbability(float probability) {
-        this.probability = Math.max(0.0f, Math.min(1.0f, probability));
     }
 }
 

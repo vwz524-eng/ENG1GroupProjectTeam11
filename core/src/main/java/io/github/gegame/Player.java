@@ -52,7 +52,7 @@ public class Player extends Sprite {
         {
             return InteractionOutcome.failure("Interaction cannot be null");
         }
-        if (!interactions.contains(interaction)) 
+        if (!interactions.contains(interaction))
         {
             interactions.add(interaction);
         }
@@ -85,12 +85,6 @@ public class Player extends Sprite {
         return Collections.unmodifiableList(interactions);
     }
 
-    public void addInteraction(Interaction interaction) {
-        if (interaction != null && !interactions.contains(interaction)) {
-            interactions.add(interaction);
-        }
-    }
-
     public Inventory getInventory() {
         return inventory;
     }
@@ -111,11 +105,6 @@ public class Player extends Sprite {
         return maxHealth;
     }
 
-    public void setMaxHealth(int maxHealth) {
-        this.maxHealth = maxHealth;
-        this.health = Math.min(this.health, maxHealth);
-    }
-
     public void heal(int amount) {
         if (amount > 0) {
             this.health = Math.min(maxHealth, health + amount);
@@ -132,13 +121,13 @@ public class Player extends Sprite {
         heal(amount);
     }
 
-    /** responsible for murdering the player in a totally non-violent way - 
-     * it's allergies I swear, ignore the fact that we call it death like 193 times in the src code 
+    /** responsible for murdering the player in a totally non-violent way -
+     * it's allergies I swear, ignore the fact that we call it death like 193 times in the src code
      */
     public boolean isDead() {
         return health <= 0;
     }
-    
+
     // checks hp is not < 0 and setts player health value to hp-dmg taken
     public void takeDamage(int amount) {
         if (!isDead()) {
@@ -154,8 +143,4 @@ public class Player extends Sprite {
         return facingY;
     }
 
-    public void setFacing(double facingX, double facingY) {
-        this.facingX = facingX;
-        this.facingY = facingY;
-    }
 }

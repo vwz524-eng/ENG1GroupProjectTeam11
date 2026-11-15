@@ -17,16 +17,12 @@ import io.github.gegame.Main;
  * Extends Retry and implements LibGDX Screen
  */
 public class lose_screen extends Retry implements Screen {
-    private String title;
+    private final String title;
     private int final_score;
 
     private final SpriteBatch batch;
     private final BitmapFont font;
     private final FitViewport viewport;
-
-    public lose_screen() {
-        this(0);
-    }
 
     public lose_screen(int finalScore) {
         this.title = "GAME OVER - YOU LOSE";
@@ -64,14 +60,6 @@ public class lose_screen extends Retry implements Screen {
     }
 
     @Override
-    public void Restart_Score() {
-        this.final_score = 0;
-    }
-
-    @Override
-    public void Reset_Level() {}
-
-    @Override
     public void render(float delta) {
         ScreenUtils.clear(0.2f, 0.05f, 0.05f, 1f);
 
@@ -96,22 +84,6 @@ public class lose_screen extends Retry implements Screen {
         }
     }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public int getFinal_score() {
-        return final_score;
-    }
-
-    public void setFinal_score(int final_score) {
-        this.final_score = final_score;
-    }
-
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height, true);
@@ -124,7 +96,7 @@ public class lose_screen extends Retry implements Screen {
 
     @Override
     public void dispose() {
-        if (batch != null) batch.dispose();
-        if (font != null) font.dispose();
+        batch.dispose();
+        font.dispose();
     }
 }

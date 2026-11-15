@@ -4,17 +4,12 @@ package io.github.gegame.interaction;
 
 public class FeedItem {
     private String name;
-    private int nutritionValue;
+    private final int nutritionValue;
     private int quantity = 1;
-
-    public FeedItem() {
-        this("Bread", 10);
-    }
 
     public FeedItem(String name, int nutritionValue) {
         this.name = name != null ? name : "Feed Item";
         this.nutritionValue = nutritionValue;
-        this.quantity = 1;
     }
 
     public FeedItem(String name, int nutritionValue, int quantity) {
@@ -48,16 +43,9 @@ public class FeedItem {
         return nutritionValue;
     }
 
-    public void setNutritionValue(int nutritionValue) {
-        this.nutritionValue = nutritionValue;
-    }
-
     public int getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(int quantity) {
-        this.quantity = Math.max(0, quantity);
-    }
 }
 

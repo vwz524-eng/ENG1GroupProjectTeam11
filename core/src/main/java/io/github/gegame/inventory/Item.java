@@ -9,7 +9,7 @@ import java.util.Objects;
 public abstract class Item {
     private String id;
     private String name;
-    private String description;
+    private final String description;
     private int quantity = 1;
 
     public Item() {
@@ -65,10 +65,6 @@ public abstract class Item {
         return quantity;
     }
 
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
     public String getId() {
         return id;
     }
@@ -87,10 +83,6 @@ public abstract class Item {
 
     public String getDescription() {
         return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     @Override

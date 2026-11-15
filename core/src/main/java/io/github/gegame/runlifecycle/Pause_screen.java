@@ -12,12 +12,14 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 
 import io.github.gegame.Main;
 
+import java.util.Objects;
+
 /**
  * Pause screen
  */
 public class Pause_screen extends Retry implements Screen {
-    private String street;
-    private String city;
+    private final String street;
+    private final String city;
 
     private final SpriteBatch batch;
     private final BitmapFont font;
@@ -40,11 +42,7 @@ public class Pause_screen extends Retry implements Screen {
 
     public void Resume_Game() {
         if (Gdx.app != null && Gdx.app.getApplicationListener() instanceof Game) {
-            if (previousScreen != null) {
-                ((Game) Gdx.app.getApplicationListener()).setScreen(previousScreen);
-            } else {
-                ((Game) Gdx.app.getApplicationListener()).setScreen(new MainGame());
-            }
+            ((Game) Gdx.app.getApplicationListener()).setScreen(Objects.requireNonNullElseGet(previousScreen, MainGame::new));
             dispose();
         }
     }
@@ -70,12 +68,6 @@ public class Pause_screen extends Retry implements Screen {
             dispose();
         }
     }
-
-    @Override
-    public void Restart_Score() {}
-
-    @Override
-    public void Reset_Level() {}
 
     @Override
     public void render(float delta) {
@@ -111,22 +103,6 @@ public class Pause_screen extends Retry implements Screen {
         } else if (Gdx.input.isKeyJustPressed(Input.Keys.M)) {
             back_to_menu();
         }
-    }
-
-    public String getStreet() {
-        return street;
-    }
-
-    public void setStreet(String street) {
-        this.street = street;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
     }
 
     @Override

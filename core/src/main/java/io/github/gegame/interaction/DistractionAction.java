@@ -8,12 +8,8 @@ Triggers a distraction and produces an InteractionOutcome with points
  */
 
 public class DistractionAction extends Interaction {
-    private double distractionPower;
-    private Distraction distraction;
-
-    public DistractionAction() {
-        this(50.0, new Distraction(150.0), new Cooldown(2.0));
-    }
+    private final double distractionPower;
+    private final Distraction distraction;
 
     public DistractionAction(double distractionPower, Distraction distraction) {
         this(distractionPower, distraction, new Cooldown(2.0));
@@ -34,7 +30,7 @@ public class DistractionAction extends Interaction {
     public InteractionOutcome execute(Player player) {
         if (!canExecute()) {
             InteractionOutcome outcome = InteractionOutcome.failure("Distraction action is on cooldown");
-            setLastOutcome(outcome);
+            setLastOutcome();
             return outcome;
         }
 
@@ -53,24 +49,13 @@ public class DistractionAction extends Interaction {
             "Distraction successfully triggered with power " + distractionPower,
             points
         );
-        setLastOutcome(outcome);
+        setLastOutcome();
         return outcome;
-    }
-
-    public double getDistractionPower() {
-        return distractionPower;
-    }
-
-    public void setDistractionPower(double distractionPower) {
-        this.distractionPower = distractionPower;
     }
 
     public Distraction getDistraction() {
         return distraction;
     }
 
-    public void setDistraction(Distraction distraction) {
-        this.distraction = distraction;
-    }
 }
 

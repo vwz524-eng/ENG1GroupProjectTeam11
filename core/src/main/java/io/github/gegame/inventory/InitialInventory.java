@@ -17,13 +17,5 @@ public class InitialInventory {
         inventory.setItem(1, new Bread());
     }
 
-    /**
-     * Static convenience helper to populate an inventory.
-     *
-     * @param inventory the inventory to populate
-     */
-    public static void populateInventory(Inventory inventory) {
-        new InitialInventory().populate(inventory);
-    }
 }
 

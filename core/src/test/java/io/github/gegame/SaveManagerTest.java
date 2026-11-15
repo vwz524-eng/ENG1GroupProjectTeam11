@@ -2,7 +2,6 @@ package io.github.gegame;
 
 import io.github.gegame.save.GameStateData;
 import io.github.gegame.save.SaveManager;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -27,7 +26,7 @@ public class SaveManagerTest {
 
     @Test
     public void testSaveAndLoadSuccess() {
-        GameStateData state = new GameStateData(120.5, 240.0, 80, 450, 210, "Normal");
+        GameStateData state = new GameStateData(120.5, 80, 450, 210, "Normal");
         state.getInventoryItemIds().add("bread");
         state.getInventoryItemIds().add("seed_bag");
         state.getDiscoveredEventIds().add("statue_umbrella");
@@ -48,13 +47,13 @@ public class SaveManagerTest {
 
     @Test
     public void testBackupCreationOnSubsequentSave() {
-        GameStateData state1 = new GameStateData(100, 100, 100, 100, 300, "Normal");
+        GameStateData state1 = new GameStateData(100, 100, 100, 300, "Normal");
         saveManager.saveGame(1, state1);
 
         File backup = saveManager.getBackupFile(1);
         assertFalse(backup.exists()); // No backup on initial save
 
-        GameStateData state2 = new GameStateData(200, 200, 90, 250, 250, "Hard");
+        GameStateData state2 = new GameStateData(200, 90, 250, 250, "Hard");
         saveManager.saveGame(1, state2);
 
         assertTrue(backup.exists()); // Backup created from previous save
@@ -62,10 +61,10 @@ public class SaveManagerTest {
 
     @Test
     public void testCorruptionRecoveryFromBackup() throws Exception {
-        GameStateData state1 = new GameStateData(150, 150, 75, 300, 200, "Easy");
+        GameStateData state1 = new GameStateData(150, 75, 300, 200, "Easy");
         saveManager.saveGame(1, state1);
 
-        GameStateData state2 = new GameStateData(250, 250, 50, 600, 100, "Hard");
+        GameStateData state2 = new GameStateData(250, 50, 600, 100, "Hard");
         saveManager.saveGame(1, state2);
 
         // Intentionally corrupt primary save file with garbage bytes

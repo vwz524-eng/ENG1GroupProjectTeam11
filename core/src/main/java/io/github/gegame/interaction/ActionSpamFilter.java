@@ -15,10 +15,6 @@ public class ActionSpamFilter {
         this.lastActionTime = -1.0;
     }
 
-    public ActionSpamFilter() {
-        this(0.12); // 120ms debounce interval
-    }
-
     /**
     Check whether action is allowed or should be blocked due to spam
     @param currentTime current timestamp or cumulative game time in s
@@ -31,10 +27,6 @@ public class ActionSpamFilter {
             return true;
         }
         return false;
-    }
-
-    public double getMinIntervalSeconds() {
-        return minIntervalSeconds;
     }
 
     public void reset() {

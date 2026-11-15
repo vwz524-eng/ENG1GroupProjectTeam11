@@ -5,20 +5,14 @@ import io.github.gegame.Player;
 //Reward granted upon discovering a hidden event
 
 public class DiscoveryReward {
-    private int scoreBonus;
-    private String revealMessage;
+    private final int scoreBonus;
 
-    public DiscoveryReward(int scoreBonus, String revealMessage) {
+    public DiscoveryReward(int scoreBonus) {
         this.scoreBonus = scoreBonus;
-        this.revealMessage = revealMessage;
     }
 
     public DiscoveryReward() {
-        this(100, "Secret Discovered!");
-    }
-
-    public void grant() {
-
+        this(100);
     }
 
     public void grant(Player player) {
@@ -27,20 +21,5 @@ public class DiscoveryReward {
         }
     }
 
-    public int getScoreBonus() {
-        return scoreBonus;
-    }
-
-    public void setScoreBonus(int scoreBonus) {
-        this.scoreBonus = scoreBonus;
-    }
-
-    public String getRevealMessage() {
-        return revealMessage;
-    }
-
-    public void setRevealMessage(String revealMessage) {
-        this.revealMessage = revealMessage;
-    }
 }
 

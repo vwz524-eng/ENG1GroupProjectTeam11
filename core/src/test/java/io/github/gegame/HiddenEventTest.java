@@ -65,7 +65,7 @@ public class HiddenEventTest {
         // Umbrella item unlocked and added to inventory
         Item umbrella = inventory.getItem("umbrella");
         assertNotNull(umbrella);
-        assertTrue(umbrella instanceof UmbrellaItem);
+        assertInstanceOf(UmbrellaItem.class, umbrella);
         assertEquals(3, ((UmbrellaItem) umbrella).getUsesRemaining());
     }
 
@@ -121,7 +121,7 @@ public class HiddenEventTest {
         // Allergy medication item added to inventory
         Item med = inventory.getItem("allergy_medication");
         assertNotNull(med);
-        assertTrue(med instanceof AllergyMedicationItem);
+        assertInstanceOf(AllergyMedicationItem.class, med);
     }
 
     @Test
@@ -246,7 +246,7 @@ public class HiddenEventTest {
 
     @Test
     public void testDiscoveryRewardGrant() {
-        DiscoveryReward reward = new DiscoveryReward(200, "Secret Found!");
+        DiscoveryReward reward = new DiscoveryReward(200);
         int scoreBefore = player.getScore();
         reward.grant(player);
         assertEquals(scoreBefore + 200, player.getScore());

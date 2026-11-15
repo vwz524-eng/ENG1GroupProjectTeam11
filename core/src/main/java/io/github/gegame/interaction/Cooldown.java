@@ -3,21 +3,12 @@ package io.github.gegame.interaction;
 // Regulates the timing between interactions.
 
 public class Cooldown {
-    private double duration;
+    private final double duration;
     private double remainingTime;
-
-    public Cooldown() {
-        this(1.0);
-    }
 
     public Cooldown(double duration) {
         this.duration = Math.max(0.0, duration);
         this.remainingTime = 0.0;
-    }
-
-    public Cooldown(double duration, double remainingTime) {
-        this.duration = Math.max(0.0, duration);
-        this.remainingTime = Math.max(0.0, remainingTime);
     }
 
     //Starts the cooldown timer by setting remainingTime to duration
@@ -46,20 +37,8 @@ public class Cooldown {
         return remainingTime <= 0.0;
     }
 
-    public double getDuration() {
-        return duration;
-    }
-
-    public void setDuration(double duration) {
-        this.duration = Math.max(0.0, duration);
-    }
-
     public double getRemainingTime() {
         return remainingTime;
-    }
-
-    public void setRemainingTime(double remainingTime) {
-        this.remainingTime = Math.max(0.0, remainingTime);
     }
 
     public void reset() {

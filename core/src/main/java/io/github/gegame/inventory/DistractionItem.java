@@ -6,16 +6,8 @@ import io.github.gegame.Player;
 //An item that creates a distraction for geese within a given radius for a duration
 
 public class DistractionItem extends Item {
-    private double radius;
-    private double duration;
-
-    public DistractionItem() {
-        this("distraction", "Distraction Item", "Distracts geese in the area", 100.0, 3.0);
-    }
-
-    public DistractionItem(double radius, double duration) {
-        this("distraction", "Distraction Item", "Distracts geese in the area", radius, duration);
-    }
+    private final double radius;
+    private final double duration;
 
     public DistractionItem(String id, String name, String description, double radius, double duration) {
         super(id, name, description);
@@ -42,16 +34,9 @@ public class DistractionItem extends Item {
         return radius;
     }
 
-    public void setRadius(double radius) {
-        this.radius = radius;
-    }
-
     public double getDuration() {
         return duration;
     }
 
-    public void setDuration(double duration) {
-        this.duration = duration;
-    }
 }
 

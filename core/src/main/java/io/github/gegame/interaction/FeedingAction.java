@@ -8,12 +8,8 @@ Consumes a FeedItem and produces an InteractionOutcome with points
  */
 
 public class FeedingAction extends Interaction {
-    private int feedAmount;
-    private FeedItem feedItem;
-
-    public FeedingAction() {
-        this(10, new FeedItem("Bread", 10), new Cooldown(1.5));
-    }
+    private final int feedAmount;
+    private final FeedItem feedItem;
 
     public FeedingAction(int feedAmount, FeedItem feedItem) {
         this(feedAmount, feedItem, new Cooldown(1.5));
@@ -35,13 +31,13 @@ public class FeedingAction extends Interaction {
     public InteractionOutcome execute(Player player) {
         if (!canExecute()) {
             InteractionOutcome outcome = InteractionOutcome.failure("Feeding action is on cooldown");
-            setLastOutcome(outcome);
+            setLastOutcome();
             return outcome;
         }
 
         if (feedItem == null || !feedItem.consume()) {
             InteractionOutcome outcome = InteractionOutcome.failure("No food available to consume");
-            setLastOutcome(outcome);
+            setLastOutcome();
             return outcome;
         }
 
@@ -56,7 +52,7 @@ public class FeedingAction extends Interaction {
             "Successfully fed with " + feedItem.getName() + " (amount: " + feedAmount + ")",
             points
         );
-        setLastOutcome(outcome);
+        setLastOutcome();
         return outcome;
     }
 
@@ -64,16 +60,9 @@ public class FeedingAction extends Interaction {
         return feedAmount;
     }
 
-    public void setFeedAmount(int feedAmount) {
-        this.feedAmount = feedAmount;
-    }
-
     public FeedItem getFeedItem() {
         return feedItem;
     }
 
-    public void setFeedItem(FeedItem feedItem) {
-        this.feedItem = feedItem;
-    }
 }
 

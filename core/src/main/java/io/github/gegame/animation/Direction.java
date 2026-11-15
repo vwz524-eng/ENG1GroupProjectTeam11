@@ -2,24 +2,19 @@ package io.github.gegame.animation;
 
 //{@link #suffix()} is the exact token used at the end of the filenames in assets.txt
 public enum Direction {
-    UP("up", 0, 1),      // libGDX's y axis points up?
-    DOWN("down", 0, -1),
-    LEFT("left", -1, 0),
-    RIGHT("right", 1, 0);
+    UP("up"),      // libGDX's y-axis points up?
+    DOWN("down"),
+    LEFT("left"),
+    RIGHT("right");
 
     private final String suffix;
-    private final int dx;
-    private final int dy;
 
-    Direction(String suffix, int dx, int dy) {
+    Direction(String suffix) {
         this.suffix = suffix;
-        this.dx = dx;
-        this.dy = dy;
     }
 
     public String suffix() { return suffix; }
-    public int dx() { return dx; }
-    public int dy() { return dy; }
+
     public boolean isHorizontal() { return this == LEFT || this == RIGHT; }
 
 

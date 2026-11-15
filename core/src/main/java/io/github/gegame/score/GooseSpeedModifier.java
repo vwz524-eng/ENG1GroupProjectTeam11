@@ -1,11 +1,9 @@
 package io.github.gegame.score;
 
 /**
- * Changes goose speed according to difficulty  
+ * Changes goose speed according to difficulty
  */
-public class GooseSpeedModifier {
-    private float multiplier;
-
+public record GooseSpeedModifier(float multiplier) {
     public GooseSpeedModifier(float multiplier) {
         this.multiplier = multiplier > 0 ? multiplier : 1.0f;
     }
@@ -18,12 +16,5 @@ public class GooseSpeedModifier {
         return baseSpeed * multiplier;
     }
 
-    public float getMultiplier() {
-        return multiplier;
-    }
-
-    public void setMultiplier(float multiplier) {
-        this.multiplier = multiplier > 0 ? multiplier : 1.0f;
-    }
 }
 

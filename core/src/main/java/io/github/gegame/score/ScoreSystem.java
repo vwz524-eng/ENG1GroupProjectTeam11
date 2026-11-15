@@ -27,10 +27,6 @@ public class ScoreSystem {
         this.penalty = new Penalty();
     }
 
-    public ScoreSystem() {
-        this(DifficultyLevel.NORMAL);
-    }
-
     /**
      * Adds time-based bonus points calculated from the remaining seconds.
      *
@@ -63,13 +59,6 @@ public class ScoreSystem {
     }
 
     /**
-     * Default no-arg discovery bonus method matching the UML signature.
-     */
-    public void addDiscoveryBonus() {
-        addDiscoveryBonus("secret_" + System.currentTimeMillis());
-    }
-
-    /**
      * Adds escape bonus points upon successfully reaching Central Hall.
      *
      * @param escapeTime seconds remaining upon reaching the objective
@@ -81,27 +70,13 @@ public class ScoreSystem {
     }
 
     /**
-     * Default no-arg escape bonus method matching the UML signature.
-     */
-    public void addEscapeBonus() {
-        addEscapeBonus(0);
-    }
-
-    /**
      * Applies a penalty, deducting points from the current score.
      *
      * @param reason explanation for the penalty
      */
     public void applyPenalty(String reason) {
-        int pointsLost = penalty.apply(reason);
+        int pointsLost = penalty.apply();
         deductPoints(pointsLost, reason != null ? reason : "Goose Encounter Penalty");
-    }
-
-    /**
-     * Default no-arg penalty method matching the UML signature.
-     */
-    public void applyPenalty() {
-        applyPenalty("Standard Penalty");
     }
 
     /**
@@ -170,10 +145,6 @@ public class ScoreSystem {
         if (listener != null && !listeners.contains(listener)) {
             listeners.add(listener);
         }
-    }
-
-    public void removeListener(ScoreListener listener) {
-        listeners.remove(listener);
     }
 
     private void notifyScoreChanged(int oldScore, int newScore, String reason) {

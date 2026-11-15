@@ -16,16 +16,12 @@ import io.github.gegame.Main;
  * Win screen
 */
 public class win_screen extends Retry implements Screen {
-    private String title;
-    private int Final_score;
+    private final String title;
+    private final int Final_score;
 
     private final SpriteBatch batch;
     private final BitmapFont font;
     private final FitViewport viewport;
-
-    public win_screen() {
-        this(0);
-    }
 
     public win_screen(int finalScore) {
         this.title = "VICTORY - YOU WON!";
@@ -63,14 +59,6 @@ public class win_screen extends Retry implements Screen {
     }
 
     @Override
-    public void Restart_Score() {
-        this.Final_score = 0;
-    }
-
-    @Override
-    public void Reset_Level() {}
-
-    @Override
     public void render(float delta) {
         ScreenUtils.clear(0.05f, 0.2f, 0.08f, 1f);
 
@@ -95,22 +83,6 @@ public class win_screen extends Retry implements Screen {
         }
     }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public int getFinal_score() {
-        return Final_score;
-    }
-
-    public void setFinal_score(int final_score) {
-        this.Final_score = final_score;
-    }
-
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height, true);
@@ -123,7 +95,7 @@ public class win_screen extends Retry implements Screen {
 
     @Override
     public void dispose() {
-        if (batch != null) batch.dispose();
-        if (font != null) font.dispose();
+        batch.dispose();
+        font.dispose();
     }
 }

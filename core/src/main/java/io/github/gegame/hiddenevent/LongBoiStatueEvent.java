@@ -11,11 +11,7 @@ public class LongBoiStatueEvent extends HiddenEvent {
     public LongBoiStatueEvent(double x, double y) {
         super("statue_umbrella", "STATUE", "Rub Long Boi's beak", x, y, 65.0);
         setOutcome(new StatueEventOutcome());
-        setReward(new DiscoveryReward(150, "You rubbed Long Boi's beak! Umbrella unlocked!"));
-    }
-
-    public LongBoiStatueEvent() {
-        this(300, 300);
+        setReward(new DiscoveryReward(150));
     }
 }
 

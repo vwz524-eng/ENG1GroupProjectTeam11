@@ -142,7 +142,7 @@ public class Main extends Game {
         }
     }
 
-    
+
     // Geese not ducks, we had a debate about how geese honk instead of quack but decided it wasn't worth changing
     private void playDuckQuack() {
         if (duckQuackSound != null) {
@@ -155,7 +155,7 @@ public class Main extends Game {
     // ---
     // does this using Gdx's glViewports
     // --
-    
+
     /**
      * Starts or restarts the (active) gameplay loop from the menu or the end screen
      */
@@ -284,7 +284,7 @@ public class Main extends Game {
 
         double speed = selectedDifficulty
             .getGooseSpeedModifier()
-            .getMultiplier() * roundSpeed;
+            .multiplier() * roundSpeed;
 
         for (int i = 0; i < gooseCount; i++) {
             Vector2 point = lakeWorld.get((i + swarmNumber - 1) % lakeWorld.size());
@@ -540,7 +540,7 @@ public class Main extends Game {
         font.setColor(Color.WHITE);
         font.draw(batch, "Items used: " + itemsUsed, 450, 393);
         font.draw(batch, "Swarm: " + Math.min(currentSwarm, TOTAL_SWARMS) + "/3", 450, 413);
-        
+
         // scales for geesebar
         font.getData().setScale(0.65f);
         for (Goose g : geese) {
@@ -756,30 +756,16 @@ public class Main extends Game {
             scoreSystem.setDifficulty(difficulty);
         }
         for (Goose g : geese) {
-            g.setSpeedMultiplier(difficulty.getGooseSpeedModifier().getMultiplier()
+            g.setSpeedMultiplier(difficulty.getGooseSpeedModifier().multiplier()
                 * (currentSwarm <= 1 ? 1.0 : 2.0));
         }
         showNotification("Difficulty set to: " + difficulty.getName().toUpperCase()
             + " (" + difficulty.getBaseMultiplier() + "x score, goose speed "
-            + difficulty.getGooseSpeedModifier().getMultiplier() + "x)!");
+            + difficulty.getGooseSpeedModifier().multiplier() + "x)!");
     }
 
     public DifficultyLevel getDifficulty() {
         return selectedDifficulty;
-    }
-
-    /**
-     * Cycles through difficulty levels
-     */
-    public void cycleDifficulty() {
-        DifficultyLevel current = selectedDifficulty != null ? selectedDifficulty : scoreSystem.getDifficulty();
-        if ("Easy".equalsIgnoreCase(current.getName())) {
-            setDifficulty(DifficultyLevel.NORMAL);
-        } else if ("Normal".equalsIgnoreCase(current.getName())) {
-            setDifficulty(DifficultyLevel.HARD);
-        } else {
-            setDifficulty(DifficultyLevel.EASY);
-        }
     }
 
     /**
@@ -792,10 +778,6 @@ public class Main extends Game {
 
     public boolean isColorBlindMode() {
         return colorBlindMode;
-    }
-
-    public void setColorBlindMode(boolean mode) {
-        this.colorBlindMode = mode;
     }
 
 
@@ -827,7 +809,4 @@ public class Main extends Game {
         if (duckQuackSound != null) duckQuackSound.dispose();
     }
 
-    public List<ItemPickup> getPickups() {
-        return pickups;
-    }
 }

@@ -43,14 +43,14 @@ public class InteractionSystemTest {
     @Test
     public void testInteractionOutcome() {
         InteractionOutcome success = InteractionOutcome.success("Great job", 100);
-        assertTrue(success.isSuccessful());
-        assertEquals("Great job", success.getMessage());
-        assertEquals(100, success.getPointsAwarded());
+        assertTrue(success.successful());
+        assertEquals("Great job", success.message());
+        assertEquals(100, success.pointsAwarded());
 
         InteractionOutcome failure = InteractionOutcome.failure("Failed attempt");
-        assertFalse(failure.isSuccessful());
-        assertEquals("Failed attempt", failure.getMessage());
-        assertEquals(0, failure.getPointsAwarded());
+        assertFalse(failure.successful());
+        assertEquals("Failed attempt", failure.message());
+        assertEquals(0, failure.pointsAwarded());
     }
 
     @Test
@@ -94,14 +94,14 @@ public class InteractionSystemTest {
 
         // First execution succeeds
         InteractionOutcome outcome1 = action.execute(player);
-        assertTrue(outcome1.isSuccessful());
-        assertEquals(50, outcome1.getPointsAwarded());
+        assertTrue(outcome1.successful());
+        assertEquals(50, outcome1.pointsAwarded());
         assertEquals(50, player.getScore());
         assertFalse(action.canExecute());
 
         // Second execution during cooldown fails
         InteractionOutcome outcome2 = action.execute(player);
-        assertFalse(outcome2.isSuccessful());
+        assertFalse(outcome2.successful());
         assertEquals(50, player.getScore()); // score didn't change
 
         // Wait out cooldown
@@ -110,8 +110,8 @@ public class InteractionSystemTest {
 
         // Third execution fails because feed item has no remaining quantity
         InteractionOutcome outcome3 = action.execute(player);
-        assertFalse(outcome3.isSuccessful());
-        assertTrue(outcome3.getMessage().contains("No food available"));
+        assertFalse(outcome3.successful());
+        assertTrue(outcome3.message().contains("No food available"));
     }
 
     @Test
@@ -123,15 +123,15 @@ public class InteractionSystemTest {
         assertTrue(action.canExecute());
 
         InteractionOutcome outcome = action.execute(player);
-        assertTrue(outcome.isSuccessful());
+        assertTrue(outcome.successful());
         assertTrue(distraction.isActive());
-        assertEquals(60, outcome.getPointsAwarded());
+        assertEquals(60, outcome.pointsAwarded());
         assertEquals(60, player.getScore());
         assertFalse(action.canExecute());
 
         // Fails while on cooldown
         InteractionOutcome outcomeCooldown = action.execute(player);
-        assertFalse(outcomeCooldown.isSuccessful());
+        assertFalse(outcomeCooldown.successful());
 
         action.getCooldown().update(1.1);
         assertTrue(action.canExecute());
@@ -147,12 +147,12 @@ public class InteractionSystemTest {
         DistractionAction distAction = new DistractionAction(40.0, new Distraction(150.0), new Cooldown(0.5));
 
         InteractionOutcome feedOutcome = player.interact(feedAction);
-        assertTrue(feedOutcome.isSuccessful());
+        assertTrue(feedOutcome.successful());
         assertEquals(50, player.getScore());
         assertTrue(player.getInteractions().contains(feedAction));
 
         InteractionOutcome distOutcome = player.interact(distAction);
-        assertTrue(distOutcome.isSuccessful());
+        assertTrue(distOutcome.successful());
         assertEquals(130, player.getScore()); // 50 + 80
         assertTrue(player.getInteractions().contains(distAction));
         assertEquals(2, player.getInteractions().size());
@@ -167,7 +167,7 @@ public class InteractionSystemTest {
         FeedingAction action = new FeedingAction(5, bread, new Cooldown(0.1));
 
         InteractionOutcome outcome = student.interact(action);
-        assertTrue(outcome.isSuccessful());
+        assertTrue(outcome.successful());
         assertEquals(25, student.getScore());
     }
 
@@ -183,7 +183,7 @@ public class InteractionSystemTest {
         assertEquals(150.0, distractionAction.getDistraction().getRadius());
 
         InteractionOutcome outcome = player.interact(feedingAction);
-        assertTrue(outcome.isSuccessful());
+        assertTrue(outcome.successful());
         assertEquals(50, player.getScore());
     }
 

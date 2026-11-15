@@ -1,6 +1,5 @@
 package io.github.gegame.score;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -36,10 +35,6 @@ public class DiscoveryBonus {
 
     public void setPoints(int points) {
         this.points = points > 0 ? points : 150;
-    }
-
-    public Set<String> getAwardedDiscoveries() {
-        return Collections.unmodifiableSet(awardedDiscoveries);
     }
 
     public void reset() {

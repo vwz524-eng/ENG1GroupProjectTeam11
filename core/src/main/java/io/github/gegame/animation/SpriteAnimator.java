@@ -65,7 +65,6 @@ public class SpriteAnimator {
     private Animation<TextureRegion> load(String path, int frameCount, float frameDuration, boolean looping) {
         try {
             if (!Gdx.files.internal(path).exists()) {
-                System.out.println("Missing texture!: " + path);
                 return null;
             }
 
@@ -77,9 +76,9 @@ public class SpriteAnimator {
             int frameWidth = texture.getWidth() / frames;
             TextureRegion[][] grid = TextureRegion.split(texture, frameWidth, texture.getHeight());
 
-            Array<TextureRegion> keyFrames = new Array<TextureRegion>(grid[0]);
-            return new Animation<TextureRegion>(frameDuration, keyFrames,
-                    looping ? Animation.PlayMode.LOOP : Animation.PlayMode.NORMAL);
+            Array<TextureRegion> keyFrames = new Array<>(grid[0]);
+            return new Animation<>(frameDuration, keyFrames,
+                looping ? Animation.PlayMode.LOOP : Animation.PlayMode.NORMAL);
         } catch (Exception e) {
             return null;
         }
@@ -101,11 +100,6 @@ public class SpriteAnimator {
     public TextureRegion getFrame() {
         Animation<TextureRegion> anim = currentAnimation();
         return anim == null ? null : anim.getKeyFrame(stateTime);
-    }
-
-    public boolean isFinished() {
-        Animation<TextureRegion> anim = currentAnimation();
-        return anim != null && anim.isAnimationFinished(stateTime);
     }
 
     public boolean hasFrames() {

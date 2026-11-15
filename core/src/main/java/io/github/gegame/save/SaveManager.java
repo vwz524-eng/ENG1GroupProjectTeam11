@@ -24,10 +24,6 @@ public class SaveManager {
         }
     }
 
-    public SaveManager() {
-        this(new File("saves"));
-    }
-
     public File getSaveFile(int slot) {
         return new File(saveDirectory, "save_slot_" + slot + ".dat");
     }
@@ -72,7 +68,7 @@ public class SaveManager {
         if (saveFile.exists()) {
             try {
                 Files.copy(saveFile.toPath(), backupFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            } 
+            }
             catch (IOException e) {
                 // Non-fatal, proceed with save
             }
@@ -81,12 +77,12 @@ public class SaveManager {
         try {
             Files.move(tempFile.toPath(), saveFile.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
             return true;
-        } 
+        }
         catch (IOException e) {
             try {
                 Files.move(tempFile.toPath(), saveFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 return true;
-            } 
+            }
             catch (IOException ex) {
                 return false;
             }
@@ -129,18 +125,5 @@ public class SaveManager {
         return getSaveFile(slot).exists() || getBackupFile(slot).exists();
     }
 
-    public boolean deleteSave(int slot) {
-        boolean deleted = false;
-        File save = getSaveFile(slot);
-        File temp = getTempFile(slot);
-        File backup = getBackupFile(slot);
-
-        if (save.exists()) deleted = save.delete();
-        if (temp.exists()) //noinspection ResultOfMethodCallIgnored
-            temp.delete();
-        if (backup.exists()) //noinspection ResultOfMethodCallIgnored
-            backup.delete();
-        return deleted;
-    }
 }
 

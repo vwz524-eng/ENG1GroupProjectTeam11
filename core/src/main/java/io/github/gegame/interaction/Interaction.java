@@ -8,13 +8,8 @@ Regulated by cooldown and produced an InteractionOutcome
  */
 
 public abstract class Interaction {
-    private double range;
-    private Cooldown cooldown;
-    private InteractionOutcome lastOutcome;
-
-    public Interaction() {
-        this(100.0, new Cooldown(1.0));
-    }
+    private final double range;
+    private final Cooldown cooldown;
 
     public Interaction(double range, Cooldown cooldown) {
         this.range = Math.max(0.0, range);
@@ -42,24 +37,11 @@ public abstract class Interaction {
         return range;
     }
 
-    public void setRange(double range) {
-        this.range = Math.max(0.0, range);
-    }
-
     public Cooldown getCooldown() {
         return cooldown;
     }
 
-    public void setCooldown(Cooldown cooldown) {
-        this.cooldown = cooldown;
-    }
-
-    public InteractionOutcome getLastOutcome() {
-        return lastOutcome;
-    }
-
-    protected void setLastOutcome(InteractionOutcome lastOutcome) {
-        this.lastOutcome = lastOutcome;
+    protected void setLastOutcome() {
     }
 }
 

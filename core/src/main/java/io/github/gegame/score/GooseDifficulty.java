@@ -6,17 +6,10 @@ package io.github.gegame.score;
  * - 4 breadcrumbs, speed (2.0x).
  * - 6 breadcrumbs, speed (2.0x).
  */
-public class GooseDifficulty {
-    private int breadcrumbsRequired;
-    private float speedMultiplier;
-
+public record GooseDifficulty(int breadcrumbsRequired, float speedMultiplier) {
     public GooseDifficulty(int breadcrumbsRequired, float speedMultiplier) {
         this.breadcrumbsRequired = Math.max(1, breadcrumbsRequired);
         this.speedMultiplier = speedMultiplier > 0 ? speedMultiplier : 1.0f;
-    }
-
-    public GooseDifficulty() {
-        this(2, 1.0f);
     }
 
     /**
@@ -34,20 +27,5 @@ public class GooseDifficulty {
         };
     }
 
-    public int getBreadcrumbsRequired() {
-        return breadcrumbsRequired;
-    }
-
-    public void setBreadcrumbsRequired(int breadcrumbsRequired) {
-        this.breadcrumbsRequired = Math.max(1, breadcrumbsRequired);
-    }
-
-    public float getSpeedMultiplier() {
-        return speedMultiplier;
-    }
-
-    public void setSpeedMultiplier(float speedMultiplier) {
-        this.speedMultiplier = speedMultiplier > 0 ? speedMultiplier : 1.0f;
-    }
 }
 

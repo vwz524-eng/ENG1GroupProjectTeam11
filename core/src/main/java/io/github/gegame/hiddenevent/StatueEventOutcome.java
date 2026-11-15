@@ -12,7 +12,6 @@ public class StatueEventOutcome extends EventOutcome {
 
     public StatueEventOutcome() {
         super(
-            "Reveals umbrella (Adds umbrella with 3 uses to inventory)",
             "You rubbed Long Boi's beak! An umbrella has been added to your inventory.",
             150
         );

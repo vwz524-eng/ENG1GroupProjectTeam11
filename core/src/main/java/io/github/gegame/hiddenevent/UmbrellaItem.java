@@ -19,7 +19,6 @@ public class UmbrellaItem extends FoundItem {
     }
 
     public static final int MAX_USES = 3;
-    public static final double PROTECTION_DURATION = 10.0;
 
     private int usesRemaining;
     private UmbrellaState state;
@@ -55,13 +54,6 @@ public class UmbrellaItem extends FoundItem {
 
     public int getUsesRemaining() {
         return usesRemaining;
-    }
-
-    public void setUsesRemaining(int usesRemaining) {
-        this.usesRemaining = Math.max(0, Math.min(MAX_USES, usesRemaining));
-        if (this.usesRemaining == 0) {
-            this.state = UmbrellaState.EXHAUSTED;
-        }
     }
 
     public UmbrellaState getState() {

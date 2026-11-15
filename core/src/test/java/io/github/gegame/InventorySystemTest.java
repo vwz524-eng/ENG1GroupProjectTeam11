@@ -171,7 +171,7 @@ public class InventorySystemTest {
 
     @Test
     public void testItemPickupSuccess() {
-        Item key = new FoundItem("key", "Key", "Gold key");
+        FoundItem key = new FoundItem("key", "Key", "Gold key");
         ItemPickup pickup = new ItemPickup(key, 50, 50);
 
         assertFalse(pickup.isCollected());
@@ -181,7 +181,7 @@ public class InventorySystemTest {
 
         assertTrue(pickup.isCollected());
         assertTrue(player.getInventory().hasItem("key"));
-        assertTrue(((FoundItem) key).isCollected());
+        assertTrue(key.isCollected());
 
         // Contacting again shouldn't duplicate
         pickup.onPlayerContact(player);

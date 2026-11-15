@@ -86,7 +86,6 @@ public class Goose extends Sprite {
         breadHungerReduction = swarm == 1 ? 50 : (swarm == 2 ? 25 : 17);
     }
 
-    public boolean isReturningToLake() { return returningToLake; }
     public boolean hasReturnedToLake() { return backInLake; }
     @SuppressWarnings("BooleanMethodIsAlwaysInverted") // Can rename, as this is 'is' should be inverted
     public boolean isAvailableForFeeding() { return !returningToLake && !backInLake; }
@@ -103,19 +102,13 @@ public class Goose extends Sprite {
         }
     }
 
-    public void increaseHunger(int amount) {
-        if (amount > 0) {
-            hunger = Math.min(MAX_HUNGER, hunger + amount);
-        }
-    }
-
     public int getHunger() { return hunger; }
-    public int getMaxHunger() { return MAX_HUNGER; }
+
     public double getHungerPercent() { return (double) hunger / MAX_HUNGER; }
     public boolean isHighHunger() { return hunger >= HIGH_HUNGER_THRESHOLD; }
 
     public boolean isEating() { return eatTimer > 0 || eatingSeeds; }
-    public boolean isDead() { return false; } // Existing API, remember geese leave rather than dying
+
     public boolean isDistracted() { return distractTimer > 0; }
 
     public void update(double dt, Student student) {
@@ -251,7 +244,4 @@ public class Goose extends Sprite {
         this.speedMultiplier = speedMultiplier > 0 ? speedMultiplier : 1.0;
     }
 
-    public double getSpeedMultiplier() {
-        return speedMultiplier;
-    }
 }

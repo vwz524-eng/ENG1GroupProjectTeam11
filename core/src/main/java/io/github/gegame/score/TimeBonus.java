@@ -5,7 +5,7 @@ package io.github.gegame.score;
  * or based on remaining time upon successful escape
  */
 public class TimeBonus {
-    private int pointsPerSecond;
+    private final int pointsPerSecond;
     private int points;
 
     public TimeBonus(int pointsPerSecond) {
@@ -30,14 +30,6 @@ public class TimeBonus {
         }
         this.points = remainingTime * pointsPerSecond;
         return this.points;
-    }
-
-    public int getPointsPerSecond() {
-        return pointsPerSecond;
-    }
-
-    public void setPointsPerSecond(int pointsPerSecond) {
-        this.pointsPerSecond = Math.max(1, pointsPerSecond);
     }
 
     public int getPoints() {

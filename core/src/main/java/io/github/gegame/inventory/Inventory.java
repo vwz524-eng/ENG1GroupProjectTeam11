@@ -1,7 +1,6 @@
 package io.github.gegame.inventory;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /*
@@ -13,7 +12,7 @@ difficulty, and UI subsystems can react to inventory changes
 public class Inventory {
     public static final int DEFAULT_CAPACITY = 5;
 
-    private int capacity;
+    private final int capacity;
     private final List<Item> items;
     private final List<InventoryListener> listeners;
     private int selectedIndex = 0;
@@ -48,12 +47,10 @@ public class Inventory {
             }
         }
         if (!added) {
-            added = items.add(item);
+            items.add(item);
         }
-        if (added) {
-            notifyItemAdded(item);
-        }
-        return added;
+        notifyItemAdded(item);
+        return true;
     }
 
     /**
@@ -123,10 +120,6 @@ public class Inventory {
         return capacity;
     }
 
-    public void setCapacity(int capacity) {
-        this.capacity = Math.max(1, capacity);
-    }
-
     public int getSize() {
         int count = 0;
         for (Item item : items) {
@@ -139,10 +132,6 @@ public class Inventory {
 
     public boolean isEmpty() {
         return getSize() == 0;
-    }
-
-    public List<Item> getItems() {
-        return Collections.unmodifiableList(items);
     }
 
     /**
@@ -179,9 +168,8 @@ public class Inventory {
     /**
      * Sets or replaces an item at the specified slot index
      * @param index slot index
-     * @return item item to place
      */
-    
+
     public void setItem(int index, Item item) {
         if (index < 0 || index >= capacity) {
             return;
@@ -197,10 +185,6 @@ public class Inventory {
 
     public Item getSelected() {
         return getItem(selectedIndex);
-    }
-
-    public void setSelected(int index) {
-        setSelectedIndex(index);
     }
 
     public void setSelectedIndex(int index) {
@@ -225,10 +209,6 @@ public class Inventory {
         if (listener != null && !listeners.contains(listener)) {
             listeners.add(listener);
         }
-    }
-
-    public void removeListener(InventoryListener listener) {
-        listeners.remove(listener);
     }
 
     private void notifyItemAdded(Item item) {

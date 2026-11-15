@@ -18,8 +18,7 @@ import io.github.gegame.score.DifficultyLevel;
  * Intro sequence screen as defined in the Game Class Diagram
  */
 public class Intro_screen implements Screen {
-    private String textSize;
-    private String text;
+    private final String text;
     private Texture image;
 
     private final SpriteBatch batch;
@@ -34,7 +33,6 @@ public class Intro_screen implements Screen {
     private int difficultyIndex = 1;
 
     public Intro_screen() {
-        this.textSize = "16pt";
         this.text = "Press ENTER / SPACE or click to continue";
         this.batch = new SpriteBatch();
         this.font = new BitmapFont();
@@ -81,7 +79,7 @@ public class Intro_screen implements Screen {
         font.draw(batch,
             "Difficulty: < " + selected.getName().toUpperCase() + " > ("
                 + selected.getBaseMultiplier() + "x score, "
-                + selected.getGooseSpeedModifier().getMultiplier() + "x goose speed)",
+                + selected.getGooseSpeedModifier().multiplier() + "x goose speed)",
             195, 110);
         font.setColor(Color.LIGHT_GRAY);
         font.draw(batch, "[LEFT / RIGHT or TAB or 1-3] Change Difficulty", 240, 82);
@@ -127,22 +125,6 @@ public class Intro_screen implements Screen {
         if (Gdx.app != null && Gdx.app.getApplicationListener() instanceof Main) {
             ((Main) Gdx.app.getApplicationListener()).setDifficulty(DIFFICULTIES[difficultyIndex]);
         }
-    }
-
-    public String getTextSize() {
-        return textSize;
-    }
-
-    public void setTextSize(String textSize) {
-        this.textSize = textSize;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
     }
 
     public Texture getImage() {

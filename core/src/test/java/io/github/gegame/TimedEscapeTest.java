@@ -104,17 +104,17 @@ public class TimedEscapeTest {
     @Test
     public void testRunStateSubclasses() {
         RunState escaped = new EscapedState();
-        assertTrue(escaped instanceof RunState);
+        assertInstanceOf(RunState.class, escaped);
         assertEquals(RunState.Type.ESCAPED, escaped.getType());
         assertTrue(escaped.isTerminal());
 
         RunState caught = new CaughtState();
-        assertTrue(caught instanceof RunState);
+        assertInstanceOf(RunState.class, caught);
         assertEquals(RunState.Type.CAUGHT, caught.getType());
         assertTrue(caught.isTerminal());
 
         RunState timeExpired = new TimeExpiredState();
-        assertTrue(timeExpired instanceof RunState);
+        assertInstanceOf(RunState.class, timeExpired);
         assertEquals(RunState.Type.TIME_EXPIRED, timeExpired.getType());
         assertTrue(timeExpired.isTerminal());
 

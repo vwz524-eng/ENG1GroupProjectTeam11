@@ -80,31 +80,10 @@ public class HiddenEventManager {
         return null;
     }
 
-    /**
-    Directly activates a speficic hidden event.
-    @param event the event to activate
-    @param player the player interacting
-    @return the outcome produced
-     */
-
-    public EventOutcome activateEvent(HiddenEvent event, Player player) {
-        if (event != null && event.canActivate() && player != null) {
-            EventOutcome outcome = event.activate(player, player.getInventory());
-            eventsInteracted++;
-            notifyActivated(event, outcome);
-            return outcome;
-        }
-        return null;
-    }
-
     public void addListener(DiscoveryListener listener) {
         if (listener != null && !listeners.contains(listener)) {
             listeners.add(listener);
         }
-    }
-
-    public void removeListener(DiscoveryListener listener) {
-        listeners.remove(listener);
     }
 
     private void notifyDiscovered(HiddenEvent event) {
@@ -159,7 +138,7 @@ public class HiddenEventManager {
 
     /**
     Fallback rendered when asset textures are unavailable
-    @param shapeRendered the Shaperenderer to draw with
+    @param shapeRenderer the Shape renderer to draw with
      */
 
     public void draw(ShapeRenderer shapeRenderer) {
@@ -210,10 +189,6 @@ public class HiddenEventManager {
 
     public int getEventsInteracted() {
         return eventsInteracted;
-    }
-
-    public void setEventsInteracted(int count) {
-        this.eventsInteracted = Math.max(0, count);
     }
 
     public void reset() {

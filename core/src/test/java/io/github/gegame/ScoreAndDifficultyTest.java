@@ -116,18 +116,18 @@ public class ScoreAndDifficultyTest {
     public void testGooseDifficultySwarms() {
         // Swarm 1: Derwent Campus
         GooseDifficulty swarm1 = GooseDifficulty.forSwarm(1);
-        assertEquals(2, swarm1.getBreadcrumbsRequired());
-        assertEquals(1.0f, swarm1.getSpeedMultiplier(), 0.001f);
+        assertEquals(2, swarm1.breadcrumbsRequired());
+        assertEquals(1.0f, swarm1.speedMultiplier(), 0.001f);
 
         // Swarm 2: Long Boi Statue
         GooseDifficulty swarm2 = GooseDifficulty.forSwarm(2);
-        assertEquals(4, swarm2.getBreadcrumbsRequired());
-        assertEquals(2.0f, swarm2.getSpeedMultiplier(), 0.001f);
+        assertEquals(4, swarm2.breadcrumbsRequired());
+        assertEquals(2.0f, swarm2.speedMultiplier(), 0.001f);
 
         // Swarm 3: Central Hall Tree
         GooseDifficulty swarm3 = GooseDifficulty.forSwarm(3);
-        assertEquals(6, swarm3.getBreadcrumbsRequired());
-        assertEquals(2.0f, swarm3.getSpeedMultiplier(), 0.001f);
+        assertEquals(6, swarm3.breadcrumbsRequired());
+        assertEquals(2.0f, swarm3.speedMultiplier(), 0.001f);
     }
 
     @Test
@@ -175,13 +175,13 @@ public class ScoreAndDifficultyTest {
 
         // Switch to EASY
         scoreSystem.setDifficulty(DifficultyLevel.EASY);
-        goose.setSpeedMultiplier(scoreSystem.getDifficulty().getGooseSpeedModifier().getMultiplier());
+        goose.setSpeedMultiplier(scoreSystem.getDifficulty().getGooseSpeedModifier().multiplier());
         assertEquals(0.8f, scoreSystem.getDifficulty().getBaseMultiplier(), 0.001f);
         assertEquals(72.0, goose.getSpeed(), 0.001); // 90 * 0.8 = 72
 
         // Switch to HARD
         scoreSystem.setDifficulty(DifficultyLevel.HARD);
-        goose.setSpeedMultiplier(scoreSystem.getDifficulty().getGooseSpeedModifier().getMultiplier());
+        goose.setSpeedMultiplier(scoreSystem.getDifficulty().getGooseSpeedModifier().multiplier());
         assertEquals(1.5f, scoreSystem.getDifficulty().getBaseMultiplier(), 0.001f);
         assertEquals(135.0, goose.getSpeed(), 0.001); // 90 * 1.5 = 135
     }

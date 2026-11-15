@@ -8,10 +8,6 @@ import io.github.gegame.Student;
 public class FoundItem extends Item {
     private boolean isCollected;
 
-    public FoundItem() {
-        this("found_item", "Found Item", "An item found in the world", false);
-    }
-
     public FoundItem(String id, String name, String description) {
         this(id, name, description, false);
     }

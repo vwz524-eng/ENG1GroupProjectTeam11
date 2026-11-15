@@ -77,8 +77,7 @@ public class Student extends Player {
             return false;
         }
 
-        if (item instanceof DistractionItem) {
-            DistractionItem distraction = (DistractionItem) item;
+        if (item instanceof DistractionItem distraction) {
             double targetX = centerX() + getFacingX() * 50.0;
             double targetY = centerY() + getFacingY() * 50.0;
             int affected = 0;
@@ -97,8 +96,7 @@ public class Student extends Player {
             distraction.consume(); // Five uses overall; each Space press uses one.
             throwTimer = THROW_SECONDS;
             return true;
-        } else if (item instanceof Bread) {
-            Bread bread = (Bread) item;
+        } else if (item instanceof Bread bread) {
             if (bread.isOnCooldown()) return false;
             Goose target = findNearestLivingGoose(geese);
             if (target == null) return false;
@@ -106,8 +104,7 @@ public class Student extends Player {
             bread.startCooldown();
             throwTimer = THROW_SECONDS;
             return true;
-        } else if (item instanceof FeedItem) {
-            FeedItem feed = (FeedItem) item;
+        } else if (item instanceof FeedItem feed) {
             Goose target = findNearestLivingGoose(geese);
             if (target == null) return false;
             target.feed(feed.getFeedAmount());
@@ -198,7 +195,7 @@ public class Student extends Player {
         batch.setColor(Color.WHITE);
     }
 
-    /** Fallback box, only used when no textures loaded, 
+    /** Fallback box, only used when no textures loaded,
      * this prevents unexpected crashes/errors */
     @Override
     public void draw(ShapeRenderer shapeRenderer) {
@@ -256,5 +253,4 @@ public class Student extends Player {
     public void setHealth(int health) { this.health = Math.max(0, Math.min(MAX_HEALTH, health)); }
 
     public double getUmbrellaTimeLeft() { return umbrellaTimer; }
-    public double getSpeed() { return SPEED; }
 }

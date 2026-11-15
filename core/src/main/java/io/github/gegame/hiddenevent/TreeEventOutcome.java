@@ -12,7 +12,6 @@ public class TreeEventOutcome extends EventOutcome {
 
     public TreeEventOutcome() {
         super(
-            "Reveals medication (increase remaining resistance by 10)",
             "Medication found! Press Space to inrease remaining resistance by 10 (max 20).",
             150
         );

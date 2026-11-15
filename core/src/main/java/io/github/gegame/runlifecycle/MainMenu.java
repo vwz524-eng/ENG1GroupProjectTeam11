@@ -20,10 +20,9 @@ import io.github.gegame.Main;
  * Main Menu screen
 */
 public class MainMenu implements Screen {
-    private String title;
-    private List<String> options;
+    private final String title;
+    private final List<String> options;
     private int selectedoption;
-    private Colour_blind_option colourBlindOption;
 
     private final SpriteBatch batch;
     private final BitmapFont font;
@@ -33,7 +32,6 @@ public class MainMenu implements Screen {
         this.title = "A Day in the Life - Main Menu";
         this.options = new ArrayList<>(Arrays.asList("Start Game", "Exit"));
         this.selectedoption = 0;
-        this.colourBlindOption = new Colour_blind_option();
 
         this.batch = new SpriteBatch();
         this.font = new BitmapFont();
@@ -47,20 +45,6 @@ public class MainMenu implements Screen {
         } else if (Gdx.app != null && Gdx.app.getApplicationListener() instanceof Game) {
             ((Game) Gdx.app.getApplicationListener()).setScreen(new MainGame());
             dispose();
-        }
-    }
-
-    public boolean check_win() {
-        return false;
-    }
-
-    public boolean check_lose() {
-        return false;
-    }
-
-    public void pause_game() {
-        if (Gdx.app != null && Gdx.app.getApplicationListener() instanceof Game) {
-            ((Game) Gdx.app.getApplicationListener()).setScreen(new Pause_screen());
         }
     }
 
@@ -109,38 +93,6 @@ public class MainMenu implements Screen {
         }
     }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public List<String> getOptions() {
-        return options;
-    }
-
-    public void setOptions(List<String> options) {
-        this.options = options;
-    }
-
-    public int getSelectedoption() {
-        return selectedoption;
-    }
-
-    public void setSelectedoption(int selectedoption) {
-        this.selectedoption = selectedoption;
-    }
-
-    public Colour_blind_option getColourBlindOption() {
-        return colourBlindOption;
-    }
-
-    public void setColourBlindOption(Colour_blind_option colourBlindOption) {
-        this.colourBlindOption = colourBlindOption;
-    }
-
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height, true);
@@ -156,4 +108,5 @@ public class MainMenu implements Screen {
         if (batch != null) batch.dispose();
         if (font != null) font.dispose();
     }
+
 }
