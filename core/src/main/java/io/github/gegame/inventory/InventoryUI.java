@@ -129,15 +129,15 @@ public class InventoryUI {
             }
 
             // Draw selected item info above hotbar
-            Item active = inventory.getSelected();
-            if (active != null) {
-                font.setColor(Color.GOLD);
-                String statusSuffix = " (" + statusFor(active) + ")";
-                font.draw(batch, "[" + (selected + 1) + "] " + active.getName() + statusSuffix + " - " + active.getDescription(), x, y + slotSize + 22);
-            } else {
-                font.setColor(Color.GRAY);
-                font.draw(batch, "[" + (selected + 1) + "] Empty Slot", x, y + slotSize + 22);
-            }
+            // Item active = inventory.getSelected();
+            // if (active != null) {
+            //     font.setColor(Color.GOLD);
+            //     String statusSuffix = " (" + statusFor(active) + ")";
+            //     font.draw(batch, "[" + (selected + 1) + "] " + active.getName() + statusSuffix + " - " + active.getDescription(), x, y + slotSize + 22);
+            // } else {
+            //     font.setColor(Color.GRAY);
+            //     font.draw(batch, "[" + (selected + 1) + "] Empty Slot", x, y + slotSize + 22);
+            // }
             batch.end();
         }
     }

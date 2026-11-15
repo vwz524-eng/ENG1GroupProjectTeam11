@@ -7,7 +7,7 @@ import io.github.gegame.inventory.FoundItem;
  * Allergy medication discovered by investigating the tree outside Central Hall.
  * Follows the Tree Allergy Medication State Diagram:
  * Hidden -> Discovered -> Collected -> HealthRestored.
- * Doubles remaining allergy resistance, capped at the maximum of 20.
+ * Increases allergy resistance by 10 (max 20). One use.
  */
 public class AllergyMedicationItem extends FoundItem {
 
