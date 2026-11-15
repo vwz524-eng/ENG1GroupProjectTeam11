@@ -1,8 +1,7 @@
 package io.github.gegame.hiddenevent;
 
-/**
- * Triggers a hidden event check based on timing thresholds.
- */
+//Triggers a hidden event check based on timing thresholds
+
 public class EventTrigger {
     private int timeThreshold;
     private double elapsedTime;

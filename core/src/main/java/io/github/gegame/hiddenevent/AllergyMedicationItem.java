@@ -3,12 +3,9 @@ package io.github.gegame.hiddenevent;
 import io.github.gegame.Player;
 import io.github.gegame.inventory.FoundItem;
 
-/**
- * Allergy medication discovered by investigating the tree outside Central Hall.
- * Follows the Tree Allergy Medication State Diagram:
- * Hidden -> Discovered -> Collected -> HealthRestored.
- * Increases allergy resistance by 10 (max 20). One use.
- */
+// Allergy medication discovered by investigating the tree outside Central Hall
+// Follows the tree allergy medication state diagram.
+
 public class AllergyMedicationItem extends FoundItem {
 
     public enum MedicationState {

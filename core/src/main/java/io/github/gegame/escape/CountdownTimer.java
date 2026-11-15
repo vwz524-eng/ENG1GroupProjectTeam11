@@ -1,8 +1,7 @@
 package io.github.gegame.escape;
 
-/**
- * Manages the countdown timer, tracks warning levels, and monitors run state.
- */
+//Manages countdown timer, tracks warning levels, and monitors run state.
+
 public class CountdownTimer {
     public static final int DEFAULT_DURATION = 300; // 5 minutes in seconds
     public static final int WARNING_THRESHOLD = 120; // 2 minutes remaining
@@ -27,27 +26,23 @@ public class CountdownTimer {
         updateWarningLevel();
     }
 
-    /**
-     * Starts or resumes the countdown timer.
-     */
+    //Starts or resumes the countdown timer
+
     public void start() {
         if (!isExpired()) {
             this.runState = RunState.RUNNING;
         }
     }
 
-    /**
-     * Pauses the countdown timer without losing progress.
-     */
+    // Pauses countdown timer without losing progress
     public void pause() {
         if (this.runState != null && this.runState.isRunning()) {
             this.runState = RunState.PAUSED;
         }
     }
 
-    /**
-     * Ticks the timer by 1 second.
-     */
+    //Ticks timer by 1s.
+
     public void tick() {
         if (this.runState == null || !this.runState.isRunning()) {
             return;
@@ -61,11 +56,9 @@ public class CountdownTimer {
         }
     }
 
-    /**
-     * Ticks the timer by elapsed delta time in seconds.
-     *
-     * @param dt delta time in seconds
-     */
+    //Ticks timer by elapsed time in seconds.
+    // @param dt delta time in s.
+
     public void tick(float dt) {
         if (this.runState == null || !this.runState.isRunning()) {
             return;
@@ -77,9 +70,8 @@ public class CountdownTimer {
         }
     }
 
-    /**
-     * Expires the timer immediately, transitioning to TIME_EXPIRED state.
-     */
+    //Expires timer immediately, transiting to TIME_EXPIRED state
+
     public void expire() {
         this.remaining = 0;
         this.warningLevel = WarningLevel.CRITICAL;
@@ -140,11 +132,9 @@ public class CountdownTimer {
         this.runState = runState;
     }
 
-    /**
-     * Formats the remaining time as MM:SS.
-     *
-     * @return formatted time string
-     */
+    //Formats remaining time as MM:SS
+    //@return formatted time string
+
     public String getFormattedTime() {
         int minutes = remaining / 60;
         int seconds = remaining % 60;

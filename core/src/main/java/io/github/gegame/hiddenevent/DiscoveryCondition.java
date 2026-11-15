@@ -2,10 +2,9 @@ package io.github.gegame.hiddenevent;
 
 import io.github.gegame.Player;
 
-/**
- * Condition determining whether a hidden event can be discovered.
- * Evaluates required items, timing conditions, and discovery probability.
- */
+//Condition determining whether a hidden event can be discovered.
+//Evaluates required items, timing conditions, and discovery probability.
+
 public class DiscoveryCondition {
     private boolean requireItem;
     private boolean requiresTime;

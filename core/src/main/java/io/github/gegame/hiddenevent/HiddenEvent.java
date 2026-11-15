@@ -3,11 +3,8 @@ package io.github.gegame.hiddenevent;
 import io.github.gegame.Player;
 import io.github.gegame.inventory.Inventory;
 
-/**
- * Represents a hidden event in the game world that rewards exploration.
- * Manages discovery state, interaction prompts, trigger zones, and produces
- * an EventOutcome upon activation.
- */
+//Represents a hidden event in the game world that rewards exploration
+
 public class HiddenEvent {
     private String eventId;
     private String eventType;
@@ -15,7 +12,8 @@ public class HiddenEvent {
     private boolean isDiscovered;
     private boolean isCompleted;
 
-    // Trigger coordinates & detection radius in world units
+    //Triggers coordinates and detection radius in world units
+
     private double x;
     private double y;
     private double triggerRadius;
@@ -47,29 +45,28 @@ public class HiddenEvent {
         this(eventId, "GENERIC", interactionPrompt, 0, 0, 60.0);
     }
 
-    /**
-     * Marks the event as discovered when the player discovers the hidden area.
-     */
+    //Marks the event as discovered when player discovers hidden area
+
     public void discover() {
         this.isDiscovered = true;
     }
 
-    /**
-     * Checks if this event can currently be activated by the player.
-     *
-     * @return true if discovered, not yet completed, and conditions met
+    /*
+    Check if this event can currently be activated by player
+    @return true if discovered, not yet completed and conditions met
      */
+
     public boolean canActivate() {
         return !isCompleted && (condition == null || condition.evaluate()) && (trigger == null || trigger.check());
     }
 
-    /**
-     * Activates this hidden event, applying its outcome to the player and inventory.
-     *
-     * @param player    the player activating the event
-     * @param inventory the player's inventory
-     * @return the outcome produced by this event
+    /*
+    Activates this hidden event, applying its outcome to player and inventory
+    @param player the player activating event
+    @param inventory the player's inventory
+    @return the outcome produced by this event
      */
+
     public EventOutcome activate(Player player, Inventory inventory) {
         if (!canActivate()) {
             return null;
@@ -87,44 +84,43 @@ public class HiddenEvent {
         return outcome;
     }
 
-    /**
-     * Activates the event without parameters for basic lifecycle state.
-     */
+    //Activates the event without parameters for basic lifecycle state
+
+
     public void activate() {
         if (canActivate()) {
             resolve();
         }
     }
 
-    /**
-     * Resolves the event, marking it completed so it cannot be triggered repeatedly.
-     */
+    // Resovles event, making it completed so it cannot be triggered repeatedly
+
     public void resolve() {
         this.isCompleted = true;
         this.isDiscovered = true;
     }
 
-    /**
-     * Checks if the given world coordinates fall within this event's trigger radius.
-     *
-     * @param px the X coordinate to check
-     * @param py the Y coordinate to check
-     * @return true if within trigger distance
+    /*
+    Checks if given world coordinates fall within this event's trigger radius.
+
+    @param px the X coordinate to check
+    @param py the Y coordinate to check
+    @return true if within trigger distance
      */
+
+
     public boolean checkTrigger(double px, double py) {
         return distanceTo(px, py) <= triggerRadius;
     }
 
-    /**
-     * Calculates Euclidean distance from a point to this event's position.
-     */
+    //Calculates distance from paint to event's position
+
     public double distanceTo(double px, double py) {
         double dx = this.x - px;
         double dy = this.y - py;
         return Math.sqrt(dx * dx + dy * dy);
     }
 
-    // Getters and Setters
     public String getEventId() {
         return eventId;
     }

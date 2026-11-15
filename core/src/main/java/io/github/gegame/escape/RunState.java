@@ -2,10 +2,8 @@ package io.github.gegame.escape;
 
 import java.util.Objects;
 
-/**
- * Represents the current running state of an escape run.
- * Provides standard state instances and can be specialized by terminal state classes.
- */
+//Represents current running state of an escape run
+
 public class RunState {
 
     public enum Type {

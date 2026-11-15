@@ -2,9 +2,8 @@ package io.github.gegame.hiddenevent;
 
 import io.github.gegame.Player;
 
-/**
- * Reward granted upon discovering a hidden event.
- */
+//Reward granted upon discovering a hidden event
+
 public class DiscoveryReward {
     private int scoreBonus;
     private String revealMessage;
@@ -19,7 +18,7 @@ public class DiscoveryReward {
     }
 
     public void grant() {
-        // Standalone grant
+
     }
 
     public void grant(Player player) {
