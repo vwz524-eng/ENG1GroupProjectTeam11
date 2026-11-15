@@ -1,14 +1,16 @@
 package io.github.gegame.save;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Data Transfer Object representing the serializable game state.
- * Stores player coordinates, health, score, timer, inventory, and secrets.
+ * Object representing a serializable game state
+ * Stores the player's coordinates, health, score, timer, inventory, and the secrets
  */
 public class GameStateData implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private double playerX;

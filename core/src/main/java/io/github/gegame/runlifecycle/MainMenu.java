@@ -1,5 +1,9 @@
 package io.github.gegame.runlifecycle;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -9,25 +13,21 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+
 import io.github.gegame.Main;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 /**
- * Main Menu screen as defined in the Game Class Diagram.
- * Contains menu options, colourblind toggle, and transitions to Main Game.
- */
+ * Main Menu screen
+*/
 public class MainMenu implements Screen {
     private String title;
     private List<String> options;
     private int selectedoption;
     private Colour_blind_option colourBlindOption;
 
-    private SpriteBatch batch;
-    private BitmapFont font;
-    private FitViewport viewport;
+    private final SpriteBatch batch;
+    private final BitmapFont font;
+    private final FitViewport viewport;
 
     public MainMenu() {
         this.title = "A Day in the Life - Main Menu";
@@ -41,8 +41,7 @@ public class MainMenu implements Screen {
     }
 
     public void start_game() {
-        if (Gdx.app != null && Gdx.app.getApplicationListener() instanceof Main) {
-            Main main = (Main) Gdx.app.getApplicationListener();
+        if (Gdx.app != null && Gdx.app.getApplicationListener() instanceof Main main) {
             main.startGameplay();
             dispose();
         } else if (Gdx.app != null && Gdx.app.getApplicationListener() instanceof Game) {
@@ -105,12 +104,8 @@ public class MainMenu implements Screen {
 
     private void selectOption(int index) {
         switch (index) {
-            case 0:
-                start_game();
-                break;
-            case 1:
-                Gdx.app.exit();
-                break;
+            case 0 -> start_game();
+            case 1 -> Gdx.app.exit();
         }
     }
 

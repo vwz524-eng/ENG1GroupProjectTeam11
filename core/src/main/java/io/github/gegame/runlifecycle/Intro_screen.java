@@ -10,12 +10,12 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+
 import io.github.gegame.Main;
 import io.github.gegame.score.DifficultyLevel;
 
 /**
- * Intro sequence screen as defined in the Game Class Diagram.
- * Displays introductory image, text, and initialises the Main Menu.
+ * Intro sequence screen as defined in the Game Class Diagram
  */
 public class Intro_screen implements Screen {
     private String textSize;
@@ -59,9 +59,7 @@ public class Intro_screen implements Screen {
         }
     }
 
-    /**
-     * Renders the intro display sequence as defined in the Class Diagram (+display_intro()).
-     */
+    //Renders the intro display sequenc
     public void display_intro() {
         viewport.apply();
         batch.setProjectionMatrix(viewport.getCamera().combined);

@@ -1,6 +1,11 @@
 package io.github.gegame.save;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
@@ -37,11 +42,10 @@ public class SaveManager {
 
     /**
      * Saves game state atomically by writing to a temporary file first,
-     * maintaining a backup of previous save state (Mitigation for R11).
      *
-     * @param slot slot number (e.g. 1, 2, 3)
-     * @param data the game state data to persist
-     * @return true if save completed successfully, false otherwise
+     * @param slot slot number
+     * @param data the game state data
+     * @return bool ? true=success : false=fail
      */
     public boolean saveGame(int slot, GameStateData data) {
         if (data == null || slot < 1) {
@@ -52,37 +56,38 @@ public class SaveManager {
         File tempFile = getTempFile(slot);
         File backupFile = getBackupFile(slot);
 
-        // 1. Write to temporary file first
         try (FileOutputStream fos = new FileOutputStream(tempFile);
              ObjectOutputStream oos = new ObjectOutputStream(fos)) {
             oos.writeObject(data);
             oos.flush();
         } catch (IOException e) {
             if (tempFile.exists()) {
+                //noinspection ResultOfMethodCallIgnored
                 tempFile.delete();
             }
             return false;
         }
 
-        // 2. Backup existing save if present
+        // Backup existing save if present
         if (saveFile.exists()) {
             try {
                 Files.copy(saveFile.toPath(), backupFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            } catch (IOException e) {
+            } 
+            catch (IOException e) {
                 // Non-fatal, proceed with save
             }
         }
 
-        // 3. Atomically rename/replace temp file to primary save file
         try {
             Files.move(tempFile.toPath(), saveFile.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
             return true;
-        } catch (IOException e) {
-            // Fallback for file systems not supporting atomic move
+        } 
+        catch (IOException e) {
             try {
                 Files.move(tempFile.toPath(), saveFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 return true;
-            } catch (IOException ex) {
+            } 
+            catch (IOException ex) {
                 return false;
             }
         }
@@ -90,7 +95,7 @@ public class SaveManager {
 
     /**
      * Loads game state from primary slot file. If corrupted or missing,
-     * automatically recovers from backup slot file (R11 resilience).
+     * automatically recovers from backup slot file (R11 resilience)
      *
      * @param slot slot number
      * @return loaded GameStateData or null if unavailable
@@ -130,9 +135,11 @@ public class SaveManager {
         File temp = getTempFile(slot);
         File backup = getBackupFile(slot);
 
-        if (save.exists()) deleted |= save.delete();
-        if (temp.exists()) temp.delete();
-        if (backup.exists()) backup.delete();
+        if (save.exists()) deleted = save.delete();
+        if (temp.exists()) //noinspection ResultOfMethodCallIgnored
+            temp.delete();
+        if (backup.exists()) //noinspection ResultOfMethodCallIgnored
+            backup.delete();
         return deleted;
     }
 }
